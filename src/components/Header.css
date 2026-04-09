@@ -1,0 +1,53 @@
+.app-header {
+  height: var(--header-height);
+  background-color: var(--bg-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: var(--shadow-header);
+  position: relative;
+  z-index: 100;
+  border-bottom: 1px solid #000;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.btn-close {
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 100%;
+  transition: color var(--transition-fast);
+}
+
+.btn-close:hover {
+  color: #fff;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 12px;
+}
+
+.factory-icon {
+  color: #fff;
+}
+
+.header-brand h1 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-transform: uppercase;
+  font-family: inherit;
+}

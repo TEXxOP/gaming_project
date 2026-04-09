@@ -1,0 +1,50 @@
+:root {
+  /* Color Palette - Flat Dark Theme based on reference */
+  --bg-page: #101216; /* Main content background */
+  --bg-sidebar: #17191F; /* Sidebar background */
+  --bg-header: #0B0D10; /* Top header background */
+  --bg-card: #1C1E24; /* Game card background */
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #8B909A;
+  --text-muted: #565A65;
+  
+  --border-color: #242731;
+  --footer-teal: #14A0B1; /* Teal bottom bar */
+  
+  /* Badges */
+  --badge-pink: #E81E61;
+  --badge-orange: #FF9800;
+  
+  /* Layout */
+  --sidebar-width: 280px;
+  --header-height: 60px;
+  --footer-height: 48px;
+  
+  /* Shadows */
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.4);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Reset buttons and generic styles */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

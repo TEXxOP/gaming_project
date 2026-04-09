@@ -1,0 +1,116 @@
+.landing-auth-split {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-page, #101216);
+}
+
+.auth-hero-image {
+  flex: 1;
+  background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.auth-hero-overlay {
+  background: linear-gradient(to top, rgba(16,18,22,1), transparent);
+  width: 100%;
+  padding: 64px;
+}
+
+.auth-hero-overlay h2 {
+  font-size: 48px;
+  color: #fff;
+  margin: 0 0 16px 0;
+  font-weight: 800;
+}
+
+.auth-hero-overlay p {
+  font-size: 18px;
+  color: #ccc;
+  margin: 0;
+}
+
+.auth-form-side {
+  width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-card, #1C1E24);
+  border-left: 1px solid var(--border-color, #242731);
+}
+
+.login-box {
+  width: 100%;
+  padding: 48px;
+  text-align: center;
+}
+
+.factory-icon-large {
+  color: var(--text-primary, #fff);
+  margin-bottom: 24px;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--text-primary, #fff);
+  letter-spacing: 0.1em;
+}
+
+.login-sub {
+  color: var(--text-secondary, #8B909A);
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+.btn-solid-login {
+  background-color: #fff;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-solid-login:hover {
+  background-color: #e0e0e0;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 900px) {
+  .landing-auth-split {
+    flex-direction: column;
+  }
+  .auth-hero-image {
+    flex: none;
+    height: 40vh;
+  }
+  .auth-form-side {
+    width: 100%;
+    flex: 1;
+    border-left: none;
+    border-top: 1px solid var(--border-color, #242731);
+  }
+  .auth-hero-overlay {
+    padding: 32px;
+  }
+  .auth-hero-overlay h2 {
+    font-size: 32px;
+  }
+}
