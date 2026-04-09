@@ -1,0 +1,257 @@
+/* ═══════════════════════════════════════════════════════
+   MOBILE CONTROLS OVERLAY — for Unity WebGL games
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Rotate to Landscape Prompt ─── */
+#mobile-rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.95);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  text-align: center;
+  gap: 24px;
+  padding: 32px;
+}
+
+#mobile-rotate-overlay .rotate-icon {
+  width: 80px;
+  height: 80px;
+  animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#mobile-rotate-overlay h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+#mobile-rotate-overlay p {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+@keyframes rotatePhone {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-90deg); }
+  50%, 75% { transform: rotate(-90deg); }
+}
+
+@media (orientation: portrait) {
+  #mobile-rotate-overlay {
+    display: flex !important;
+  }
+}
+
+@media (orientation: landscape) {
+  #mobile-rotate-overlay {
+    display: none !important;
+  }
+}
+
+/* ─── Controls Container ─── */
+#mobile-controls-layer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── Joystick Zone (Left Side) ─── */
+#joystick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40%;
+  height: 60%;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* ─── Action Buttons (Right Side) ─── */
+#action-buttons {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: auto;
+}
+
+.action-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  touch-action: none;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.1s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.action-btn:active,
+.action-btn.pressed {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.action-btn.btn-primary-action {
+  width: 76px;
+  height: 76px;
+  font-size: 12px;
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.action-btn.btn-primary-action:active,
+.action-btn.btn-primary-action.pressed {
+  background: rgba(239, 68, 68, 0.5);
+  border-color: rgba(239, 68, 68, 0.9);
+}
+
+/* Secondary row of buttons */
+#action-buttons-secondary {
+  position: absolute;
+  right: 96px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+#action-buttons-secondary .action-btn {
+  width: 52px;
+  height: 52px;
+  font-size: 10px;
+}
+
+/* ─── Keyboard Input Helper ─── */
+#mobile-keyboard-helper {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: none;
+  pointer-events: auto;
+}
+
+#mobile-keyboard-helper .kb-toggle-btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#mobile-keyboard-input {
+  position: fixed;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1002;
+  width: 280px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(20, 20, 30, 0.95);
+  color: #fff;
+  font-size: 16px; /* prevents iOS zoom on focus */
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+}
+
+#mobile-keyboard-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ─── Look/Aim Zone (Right Side - FPS only) ─── */
+#look-zone {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 55%;
+  height: 60%;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* ─── Mobile Performance Badge ─── */
+#mobile-perf-notice {
+  position: fixed;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 3px 12px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  pointer-events: none;
+  display: none;
+}
+
+/* Only show on mobile */
+@media (hover: none) and (pointer: coarse) {
+  #mobile-controls-layer {
+    display: block;
+  }
+  #mobile-keyboard-helper {
+    display: block;
+  }
+  #mobile-perf-notice {
+    display: block;
+  }
+}
+
+/* Hide on desktop */
+@media (hover: hover) and (pointer: fine) {
+  #mobile-controls-layer,
+  #mobile-keyboard-helper,
+  #mobile-rotate-overlay,
+  #mobile-perf-notice {
+    display: none !important;
+  }
+}
