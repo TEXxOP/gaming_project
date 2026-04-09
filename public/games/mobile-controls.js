@@ -38,9 +38,12 @@
     init();
   }
 
+  var controlsActive = false;
+
   function init() {
     console.log('[MobileControls] Initializing...');
     injectHTML();
+    setupControlsToggle();
     loadNippleJS(function () {
       console.log('[MobileControls] nipplejs loaded, setting up joystick');
       setupJoystick();
@@ -48,7 +51,7 @@
     setupActionButtons();
     setupKeyboardHelper();
     setupLookZone();
-    console.log('[MobileControls] Init complete');
+    console.log('[MobileControls] Init complete — controls OFF by default, tap toggle to enable');
   }
 
   // ═══════════════════════════════════════════════
@@ -147,7 +150,48 @@
     perfNotice.textContent = 'Mobile WebGL — Performance may vary';
     document.body.appendChild(perfNotice);
 
+    // ── Controls toggle button ──
+    var toggleBtn = document.createElement('button');
+    toggleBtn.id = 'controls-toggle';
+    toggleBtn.innerHTML = '🎮 Controls: OFF';
+    document.body.appendChild(toggleBtn);
+
     console.log('[MobileControls] HTML injected');
+  }
+
+  // ═══════════════════════════════════════════════
+  // CONTROLS TOGGLE (show/hide virtual controls)
+  // ═══════════════════════════════════════════════
+  function setupControlsToggle() {
+    var toggleBtn = document.getElementById('controls-toggle');
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      controlsActive = !controlsActive;
+
+      if (controlsActive) {
+        document.body.classList.add('controls-active');
+        toggleBtn.innerHTML = '🎮 Controls: ON';
+        toggleBtn.classList.add('active');
+      } else {
+        document.body.classList.remove('controls-active');
+        toggleBtn.innerHTML = '🎮 Controls: OFF';
+        toggleBtn.classList.remove('active');
+      }
+
+      console.log('[MobileControls] Controls', controlsActive ? 'ON' : 'OFF');
+    }, { passive: false });
+
+    // Also handle click for non-touch scenarios
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    console.log('[MobileControls] Toggle button ready');
   }
 
   // ═══════════════════════════════════════════════

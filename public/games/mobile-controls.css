@@ -2,6 +2,7 @@
    MOBILE CONTROLS OVERLAY — for Unity WebGL games
    Visibility is controlled by .mobile-device class on <body>,
    set by mobile-controls.js via userAgent detection.
+   Controls toggle on/off so game menus remain tappable.
    ═══════════════════════════════════════════════════════ */
 
 /* ─── Rotate to Landscape Prompt ─── */
@@ -47,7 +48,6 @@
   50%, 75% { transform: rotate(-90deg); }
 }
 
-/* Show rotate overlay ONLY in portrait on mobile */
 body.mobile-device #mobile-rotate-overlay {
   display: flex;
 }
@@ -56,6 +56,43 @@ body.mobile-device #mobile-rotate-overlay {
   body.mobile-device #mobile-rotate-overlay {
     display: none !important;
   }
+}
+
+/* ─── Controls Toggle Button (always visible on mobile) ─── */
+#controls-toggle {
+  display: none;
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 10003;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+#controls-toggle.active {
+  background: rgba(34, 197, 94, 0.3);
+  border-color: rgba(34, 197, 94, 0.7);
+}
+
+body.mobile-device #controls-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ─── Controls Container ─── */
@@ -69,8 +106,8 @@ body.mobile-device #mobile-rotate-overlay {
   -webkit-user-select: none;
 }
 
-/* Show controls on mobile */
-body.mobile-device #mobile-controls-layer {
+/* Controls only visible when toggled ON */
+body.mobile-device.controls-active #mobile-controls-layer {
   display: block;
 }
 
@@ -207,7 +244,7 @@ body.mobile-device #mobile-keyboard-helper {
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(20, 20, 30, 0.95);
   color: #fff;
-  font-size: 16px; /* prevents iOS zoom on focus */
+  font-size: 16px;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   outline: none;
   backdrop-filter: blur(10px);
