@@ -96,6 +96,14 @@ body.mobile-device #controls-toggle {
 }
 
 /* ─── Unity Canvas Letterboxing (Safe for iframes) ─── */
+html, body {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
 body.mobile-device #unity-container {
   display: flex !important;
   align-items: center !important;
@@ -105,7 +113,6 @@ body.mobile-device #unity-container {
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  overflow: hidden !important;
 }
 
 body.mobile-device #unity-footer {
@@ -113,13 +120,15 @@ body.mobile-device #unity-footer {
 }
 
 body.mobile-device #unity-canvas {
-  width: auto !important;
+  /* Remove Unity's inline styles */
+  width: 100% !important;
   height: 100% !important;
+  /* Force it to strictly keep its aspect ratio */
   max-width: 100% !important;
   max-height: 100% !important;
   aspect-ratio: 16 / 9 !important;
   object-fit: contain !important;
-  margin: auto !important;
+  flex-shrink: 0 !important;
 }
 
 /* ─── Controls Container ─── */
