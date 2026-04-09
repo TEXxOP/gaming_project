@@ -95,27 +95,31 @@ body.mobile-device #controls-toggle {
   gap: 6px;
 }
 
-/* ─── Unity Canvas Letterboxing (Fixes cut-off UI on ultrawide phones) ─── */
+/* ─── Unity Canvas Letterboxing (Safe for iframes) ─── */
 body.mobile-device #unity-container {
   display: flex !important;
-  flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   background-color: #000 !important;
-  width: 100vw !important;
-  height: 100vh !important;
   position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
-body.mobile-device #unity-container #unity-canvas {
+  inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  /* The magic math to enforce a maximum 16:9 aspect ratio */
-  max-width: calc(100vh * (16 / 9)) !important;
-  max-height: calc(100vw * (9 / 16)) !important;
+  overflow: hidden !important;
+}
+
+body.mobile-device #unity-footer {
+  display: none !important;
+}
+
+body.mobile-device #unity-canvas {
+  width: auto !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: 16 / 9 !important;
   object-fit: contain !important;
+  margin: auto !important;
 }
 
 /* ─── Controls Container ─── */
