@@ -13,14 +13,25 @@
 (function () {
   'use strict';
 
-  // ─── Only activate on mobile/touch devices ───
+  // ─── Detect mobile via userAgent ───
   var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  // Also check touch support as fallback
+  if (!isMobile) {
+    isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  }
+
   if (!isMobile) return;
+
+  // ─── Add mobile class to body for CSS ───
+  document.body.classList.add('mobile-device');
 
   var scriptTag = document.currentScript || document.querySelector('script[data-game-type]');
   var gameType = (scriptTag && scriptTag.getAttribute('data-game-type')) || 'fps';
 
-  // ─── Wait for DOM ───
+  console.log('[MobileControls] Detected mobile device, game type:', gameType);
+
+  // ─── Wait for DOM then init ───
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
@@ -28,13 +39,16 @@
   }
 
   function init() {
+    console.log('[MobileControls] Initializing...');
     injectHTML();
     loadNippleJS(function () {
+      console.log('[MobileControls] nipplejs loaded, setting up joystick');
       setupJoystick();
     });
     setupActionButtons();
     setupKeyboardHelper();
     setupLookZone();
+    console.log('[MobileControls] Init complete');
   }
 
   // ═══════════════════════════════════════════════
@@ -91,7 +105,7 @@
     }
     controlsLayer.appendChild(actionBtns);
 
-    // Secondary buttons
+    // Secondary buttons (FPS only)
     if (gameType === 'fps') {
       var secBtns = document.createElement('div');
       secBtns.id = 'action-buttons-secondary';
@@ -121,7 +135,7 @@
     var kbInput = document.createElement('input');
     kbInput.id = 'mobile-keyboard-input';
     kbInput.type = 'text';
-    kbInput.placeholder = 'Type here...';
+    kbInput.placeholder = 'Type here, press Enter to submit...';
     kbInput.autocomplete = 'off';
     kbInput.autocapitalize = 'off';
     kbInput.spellcheck = false;
@@ -132,6 +146,8 @@
     perfNotice.id = 'mobile-perf-notice';
     perfNotice.textContent = 'Mobile WebGL — Performance may vary';
     document.body.appendChild(perfNotice);
+
+    console.log('[MobileControls] HTML injected');
   }
 
   // ═══════════════════════════════════════════════
@@ -145,9 +161,23 @@
     var script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.2/nipplejs.min.js';
     script.crossOrigin = 'anonymous';
-    script.onload = callback;
+    script.onload = function() {
+      console.log('[MobileControls] nipplejs loaded successfully');
+      callback();
+    };
     script.onerror = function () {
-      console.warn('[MobileControls] Failed to load nipplejs — joystick disabled');
+      console.warn('[MobileControls] Failed to load nipplejs — trying alternate CDN');
+      // Try alternate CDN
+      var alt = document.createElement('script');
+      alt.src = 'https://unpkg.com/nipplejs@0.10.2/dist/nipplejs.min.js';
+      alt.onload = function() {
+        console.log('[MobileControls] nipplejs loaded from alternate CDN');
+        callback();
+      };
+      alt.onerror = function() {
+        console.error('[MobileControls] Failed to load nipplejs from all CDNs');
+      };
+      document.head.appendChild(alt);
     };
     document.head.appendChild(script);
   }
@@ -156,10 +186,16 @@
   // VIRTUAL JOYSTICK (WASD)
   // ═══════════════════════════════════════════════
   function setupJoystick() {
-    if (!window.nipplejs) return;
+    if (!window.nipplejs) {
+      console.warn('[MobileControls] nipplejs not available');
+      return;
+    }
 
     var zone = document.getElementById('joystick-zone');
-    if (!zone) return;
+    if (!zone) {
+      console.warn('[MobileControls] joystick-zone not found');
+      return;
+    }
 
     var activeKeys = {};
     var joystick = nipplejs.create({
@@ -178,13 +214,13 @@
       right: { key: 'd', code: 'KeyD', keyCode: 68 }
     };
 
-    // For racing, use arrow keys instead
+    // For racing, also use WASD (most Unity racing games respond to WASD)
     if (gameType === 'racing') {
       keyMap = {
-        up: { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 },
-        down: { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 },
-        left: { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 },
-        right: { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 }
+        up: { key: 'w', code: 'KeyW', keyCode: 87 },
+        down: { key: 's', code: 'KeyS', keyCode: 83 },
+        left: { key: 'a', code: 'KeyA', keyCode: 65 },
+        right: { key: 'd', code: 'KeyD', keyCode: 68 }
       };
     }
 
@@ -215,7 +251,6 @@
     });
 
     joystick.on('end', function () {
-      // Release all keys
       Object.keys(activeKeys).forEach(function (dir) {
         if (activeKeys[dir]) {
           simulateKey(keyMap[dir].key, 'keyup', keyMap[dir].code, keyMap[dir].keyCode);
@@ -223,22 +258,27 @@
         }
       });
     });
+
+    console.log('[MobileControls] Joystick ready');
   }
 
   // ═══════════════════════════════════════════════
   // ACTION BUTTONS (Fire, Jump, etc.)
   // ═══════════════════════════════════════════════
   function setupActionButtons() {
+    // Use touchstart/touchend for immediate response
     document.addEventListener('touchstart', handleBtnTouch, { passive: false });
     document.addEventListener('touchend', handleBtnRelease, { passive: false });
+    document.addEventListener('touchcancel', handleBtnRelease, { passive: false });
 
     function handleBtnTouch(e) {
       var btn = e.target.closest('.action-btn');
       if (!btn) return;
       e.preventDefault();
+      e.stopPropagation();
       btn.classList.add('pressed');
 
-      if (btn.dataset.key !== undefined) {
+      if (btn.dataset.key !== undefined && btn.dataset.key !== '') {
         simulateKey(
           btn.dataset.key,
           'keydown',
@@ -255,26 +295,29 @@
     }
 
     function handleBtnRelease(e) {
-      var btn = e.target.closest('.action-btn');
-      if (!btn) return;
-      e.preventDefault();
-      btn.classList.remove('pressed');
+      // Release ALL pressed buttons (handles multi-touch edge cases)
+      var pressedBtns = document.querySelectorAll('.action-btn.pressed');
+      pressedBtns.forEach(function(btn) {
+        btn.classList.remove('pressed');
 
-      if (btn.dataset.key !== undefined) {
-        simulateKey(
-          btn.dataset.key,
-          'keyup',
-          btn.dataset.code || '',
-          parseInt(btn.dataset.keycode) || 0
-        );
-      }
+        if (btn.dataset.key !== undefined && btn.dataset.key !== '') {
+          simulateKey(
+            btn.dataset.key,
+            'keyup',
+            btn.dataset.code || '',
+            parseInt(btn.dataset.keycode) || 0
+          );
+        }
 
-      if (btn.dataset.mouse === 'left') {
-        simulateMouse('mouseup', 0);
-      } else if (btn.dataset.mouse === 'right') {
-        simulateMouse('mouseup', 2);
-      }
+        if (btn.dataset.mouse === 'left') {
+          simulateMouse('mouseup', 0);
+        } else if (btn.dataset.mouse === 'right') {
+          simulateMouse('mouseup', 2);
+        }
+      });
     }
+
+    console.log('[MobileControls] Action buttons ready');
   }
 
   // ═══════════════════════════════════════════════
@@ -287,7 +330,7 @@
     if (!lookZone) return;
 
     var lastTouch = null;
-    var sensitivity = 1.5;
+    var sensitivity = 2.0;
 
     lookZone.addEventListener('touchstart', function (e) {
       e.preventDefault();
@@ -309,13 +352,13 @@
         var centerX = rect.left + rect.width / 2;
         var centerY = rect.top + rect.height / 2;
 
-        // Dispatch mousemove with movement delta
         canvas.dispatchEvent(new MouseEvent('mousemove', {
           clientX: centerX + dx,
           clientY: centerY + dy,
           movementX: dx,
           movementY: dy,
-          bubbles: true
+          bubbles: true,
+          cancelable: true
         }));
       }
 
@@ -326,6 +369,8 @@
       e.preventDefault();
       lastTouch = null;
     }, { passive: false });
+
+    console.log('[MobileControls] Look zone ready');
   }
 
   // ═══════════════════════════════════════════════
@@ -338,49 +383,47 @@
 
     var isVisible = false;
 
-    toggleBtn.addEventListener('click', function () {
+    toggleBtn.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       isVisible = !isVisible;
       input.style.display = isVisible ? 'block' : 'none';
       if (isVisible) {
-        input.focus();
+        setTimeout(function() { input.focus(); }, 100);
       } else {
         input.blur();
       }
-    });
+    }, { passive: false });
 
-    // Forward keystrokes to the Unity canvas
-    input.addEventListener('keydown', function (e) {
-      simulateKey(e.key, 'keydown', e.code, e.keyCode);
-    });
-
-    input.addEventListener('keyup', function (e) {
-      simulateKey(e.key, 'keyup', e.code, e.keyCode);
-    });
-
-    // Also handle input events for text entry (covers virtual keyboard)
+    // Forward each character typed to Unity canvas
     input.addEventListener('input', function (e) {
       var val = input.value;
       if (val.length > 0) {
         var lastChar = val.charAt(val.length - 1);
-        // Simulate pressing and releasing the character
-        simulateKey(lastChar, 'keydown', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
-        simulateKey(lastChar, 'keyup', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
-
-        // Also dispatch a KeyboardEvent with the key for Unity's newer input system
         var canvas = document.getElementById('unity-canvas');
+
+        // keydown
+        simulateKey(lastChar, 'keydown', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
+        // keypress (some Unity input systems need this)
         if (canvas) {
           canvas.dispatchEvent(new KeyboardEvent('keypress', {
             key: lastChar,
             charCode: lastChar.charCodeAt(0),
-            bubbles: true
+            keyCode: lastChar.charCodeAt(0),
+            which: lastChar.charCodeAt(0),
+            bubbles: true,
+            cancelable: true
           }));
         }
+        // keyup
+        simulateKey(lastChar, 'keyup', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
       }
     });
 
-    // Close keyboard input on Enter
+    // Handle Enter key to submit
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
+        e.preventDefault();
         simulateKey('Enter', 'keydown', 'Enter', 13);
         simulateKey('Enter', 'keyup', 'Enter', 13);
         input.value = '';
@@ -390,45 +433,37 @@
       }
     });
 
-    // Also listen for taps on the canvas - if Unity shows an input field,
-    // auto-open our keyboard helper
-    var canvas = document.getElementById('unity-canvas');
-    if (canvas) {
-      canvas.addEventListener('touchend', function () {
-        // Small delay to let Unity process the tap
-        setTimeout(function () {
-          // We can't detect Unity's internal focus state, so we just keep
-          // the keyboard button visible for the user to tap when needed
-        }, 100);
-      });
-    }
+    console.log('[MobileControls] Keyboard helper ready');
   }
 
   // ═══════════════════════════════════════════════
-  // UTILITY: Simulate keyboard events
+  // UTILITY: Simulate keyboard events on canvas
   // ═══════════════════════════════════════════════
   function simulateKey(key, type, code, keyCode) {
     var canvas = document.getElementById('unity-canvas');
-    var target = canvas || document;
-
-    var evt = new KeyboardEvent(type, {
+    
+    var eventInit = {
       key: key,
       code: code || ('Key' + key.toUpperCase()),
       keyCode: keyCode || key.charCodeAt(0),
       which: keyCode || key.charCodeAt(0),
       bubbles: true,
       cancelable: true
-    });
+    };
 
-    target.dispatchEvent(evt);
-    // Also dispatch on document for Unity builds that listen there
-    if (target !== document) {
-      document.dispatchEvent(evt);
+    var evt = new KeyboardEvent(type, eventInit);
+
+    // Dispatch on canvas (primary target for Unity)
+    if (canvas) {
+      canvas.dispatchEvent(evt);
     }
+    // Also dispatch on document & window (some Unity builds listen here)
+    document.dispatchEvent(new KeyboardEvent(type, eventInit));
+    window.dispatchEvent(new KeyboardEvent(type, eventInit));
   }
 
   // ═══════════════════════════════════════════════
-  // UTILITY: Simulate mouse events
+  // UTILITY: Simulate mouse events on canvas
   // ═══════════════════════════════════════════════
   function simulateMouse(type, button) {
     var canvas = document.getElementById('unity-canvas');
@@ -438,15 +473,17 @@
     var centerX = rect.left + rect.width / 2;
     var centerY = rect.top + rect.height / 2;
 
-    canvas.dispatchEvent(new MouseEvent(type, {
+    var evt = new MouseEvent(type, {
       button: button,
+      buttons: button === 0 ? 1 : 2,
       clientX: centerX,
       clientY: centerY,
       bubbles: true,
       cancelable: true
-    }));
+    });
 
-    // For left click, also dispatch click event
+    canvas.dispatchEvent(evt);
+
     if (type === 'mouseup' && button === 0) {
       canvas.dispatchEvent(new MouseEvent('click', {
         button: 0,

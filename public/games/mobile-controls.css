@@ -1,5 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    MOBILE CONTROLS OVERLAY — for Unity WebGL games
+   Visibility is controlled by .mobile-device class on <body>,
+   set by mobile-controls.js via userAgent detection.
    ═══════════════════════════════════════════════════════ */
 
 /* ─── Rotate to Landscape Prompt ─── */
@@ -45,14 +47,13 @@
   50%, 75% { transform: rotate(-90deg); }
 }
 
-@media (orientation: portrait) {
-  #mobile-rotate-overlay {
-    display: flex !important;
-  }
+/* Show rotate overlay ONLY in portrait on mobile */
+body.mobile-device #mobile-rotate-overlay {
+  display: flex;
 }
 
 @media (orientation: landscape) {
-  #mobile-rotate-overlay {
+  body.mobile-device #mobile-rotate-overlay {
     display: none !important;
   }
 }
@@ -62,10 +63,15 @@
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 10000;
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Show controls on mobile */
+body.mobile-device #mobile-controls-layer {
+  display: block;
 }
 
 /* ─── Joystick Zone (Left Side) ─── */
@@ -113,6 +119,9 @@
   transition: transform 0.1s, background 0.1s;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  pointer-events: auto;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .action-btn:active,
@@ -159,9 +168,13 @@
   top: 8px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1001;
+  z-index: 10001;
   display: none;
   pointer-events: auto;
+}
+
+body.mobile-device #mobile-keyboard-helper {
+  display: block;
 }
 
 #mobile-keyboard-helper .kb-toggle-btn {
@@ -179,6 +192,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  pointer-events: auto;
 }
 
 #mobile-keyboard-input {
@@ -186,7 +200,7 @@
   top: 48px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1002;
+  z-index: 10002;
   width: 280px;
   padding: 12px 16px;
   border-radius: 12px;
@@ -222,7 +236,7 @@
   bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 999;
+  z-index: 9999;
   background: rgba(0, 0, 0, 0.6);
   color: rgba(255, 255, 255, 0.5);
   padding: 3px 12px;
@@ -233,25 +247,6 @@
   display: none;
 }
 
-/* Only show on mobile */
-@media (hover: none) and (pointer: coarse) {
-  #mobile-controls-layer {
-    display: block;
-  }
-  #mobile-keyboard-helper {
-    display: block;
-  }
-  #mobile-perf-notice {
-    display: block;
-  }
-}
-
-/* Hide on desktop */
-@media (hover: hover) and (pointer: fine) {
-  #mobile-controls-layer,
-  #mobile-keyboard-helper,
-  #mobile-rotate-overlay,
-  #mobile-perf-notice {
-    display: none !important;
-  }
+body.mobile-device #mobile-perf-notice {
+  display: block;
 }
