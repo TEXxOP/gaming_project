@@ -3,11 +3,11 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user, logInWithGoogle, logOut } = useAuth();
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <nav className="sidebar-nav">
         <NavLink to="/" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
           <span className="nav-icon">🏠</span>

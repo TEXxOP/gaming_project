@@ -36,3 +36,25 @@
 .btn-download:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+  .app-footer {
+    padding: 0 12px;
+  }
+
+  .footer-content p {
+    font-size: 11px;
+    padding-right: 48px; /* avoid overlap with download button */
+  }
+
+  .btn-download {
+    width: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content p {
+    font-size: 10px;
+  }
+}

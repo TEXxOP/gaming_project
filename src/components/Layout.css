@@ -7,7 +7,8 @@
 .layout-body {
   display: flex;
   flex: 1;
-  overflow: hidden; /* prevents full page scroll if content handles inner scroll */
+  overflow: hidden;
+  position: relative;
 }
 
 .layout-main {
@@ -17,8 +18,30 @@
   background-color: var(--bg-page);
 }
 
+/* Mobile backdrop overlay */
+.sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  .layout-body {
-    flex-direction: column;
+  .layout-main {
+    padding: 16px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
