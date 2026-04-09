@@ -95,6 +95,29 @@ body.mobile-device #controls-toggle {
   gap: 6px;
 }
 
+/* ─── Unity Canvas Letterboxing (Fixes cut-off UI on ultrawide phones) ─── */
+body.mobile-device #unity-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #000 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+body.mobile-device #unity-container #unity-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  /* The magic math to enforce a maximum 16:9 aspect ratio */
+  max-width: calc(100vh * (16 / 9)) !important;
+  max-height: calc(100vw * (9 / 16)) !important;
+  object-fit: contain !important;
+}
+
 /* ─── Controls Container ─── */
 #mobile-controls-layer {
   display: none;
