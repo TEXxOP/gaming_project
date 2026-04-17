@@ -45,3 +45,33 @@
     pointer-events: auto;
   }
 }
+
+/* ─── Mobile Landscape: hide chrome for immersive gaming ─── */
+@media (max-width: 932px) and (orientation: landscape) {
+  .layout-root {
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .layout-main {
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  /* Optionally hide header/footer for full immersion */
+  .app-header {
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    border: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  footer {
+    display: none !important;
+  }
+}

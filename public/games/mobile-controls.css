@@ -1,92 +1,131 @@
 /* ═══════════════════════════════════════════════════════
-   MOBILE CONTROLS OVERLAY — for Unity WebGL games
-   Visibility is controlled by .mobile-device class on <body>,
-   set by mobile-controls.js via userAgent detection.
-   Controls toggle on/off so game menus remain tappable.
+   MOBILE CONTROLS OVERLAY — Premium Edition
+   For Unity WebGL games on mobile devices.
+   Controls auto-activate on landscape, with polished
+   glassmorphic UI and optimized touch targets.
    ═══════════════════════════════════════════════════════ */
 
-/* ─── Rotate to Landscape Prompt ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');
+
+/* ──────────────────────────────────────────────────
+   ROTATE TO LANDSCAPE PROMPT
+   ────────────────────────────────────────────────── */
 #mobile-rotate-overlay {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: rgba(0, 0, 0, 0.95);
+  background: radial-gradient(ellipse at center, rgba(10, 12, 18, 0.97), rgba(0, 0, 0, 0.99));
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   text-align: center;
-  gap: 24px;
+  gap: 20px;
   padding: 32px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #mobile-rotate-overlay .rotate-icon {
-  width: 80px;
-  height: 80px;
-  animation: rotatePhone 2s ease-in-out infinite;
+  width: 72px;
+  height: 72px;
+  animation: rotatePhone 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.4));
 }
 
 #mobile-rotate-overlay h2 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #fff, #a0e0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 #mobile-rotate-overlay p {
-  font-size: 14px;
-  color: #aaa;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
   margin: 0;
-  max-width: 280px;
-  line-height: 1.5;
+  max-width: 260px;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 @keyframes rotatePhone {
   0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-90deg); }
-  50%, 75% { transform: rotate(-90deg); }
+  20% { transform: rotate(-90deg) scale(1.05); }
+  50%, 70% { transform: rotate(-90deg); }
+  90% { transform: rotate(0deg); }
 }
 
+/* Show rotate overlay in portrait on mobile */
 body.mobile-device #mobile-rotate-overlay {
   display: flex;
 }
 
+/* Hide when landscape */
 @media (orientation: landscape) {
   body.mobile-device #mobile-rotate-overlay {
     display: none !important;
   }
 }
 
-/* ─── Controls Toggle Button (always visible on mobile) ─── */
+/* ──────────────────────────────────────────────────
+   CONTROLS TOGGLE BUTTON (Always visible on mobile)
+   ────────────────────────────────────────────────── */
 #controls-toggle {
   display: none;
   position: fixed;
   top: 8px;
   right: 8px;
   z-index: 10003;
-  background: rgba(0, 0, 0, 0.75);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 24px;
-  font-size: 12px;
+  background: rgba(15, 17, 22, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 700;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   cursor: pointer;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   pointer-events: auto;
   -webkit-user-select: none;
   user-select: none;
   touch-action: none;
-  letter-spacing: 0.03em;
-  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+#controls-toggle .toggle-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 60, 60, 0.7);
+  box-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
+  transition: all 0.3s ease;
+  margin-right: 2px;
 }
 
 #controls-toggle.active {
-  background: rgba(34, 197, 94, 0.3);
-  border-color: rgba(34, 197, 94, 0.7);
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 16px rgba(34, 197, 94, 0.15);
+}
+
+#controls-toggle.active .toggle-icon {
+  background: rgba(34, 197, 94, 0.9);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
 }
 
 body.mobile-device #controls-toggle {
@@ -95,7 +134,9 @@ body.mobile-device #controls-toggle {
   gap: 6px;
 }
 
-/* ─── Unity Canvas Letterboxing (Safe for iframes) ─── */
+/* ──────────────────────────────────────────────────
+   UNITY CANVAS — FULLSCREEN MOBILE LAYOUT
+   ────────────────────────────────────────────────── */
 html, body {
   width: 100% !important;
   height: 100% !important;
@@ -104,15 +145,22 @@ html, body {
   overflow: hidden !important;
 }
 
+body.mobile-device {
+  /* Lock to landscape visual cues */
+  touch-action: none;
+}
+
 body.mobile-device #unity-container {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   background-color: #000 !important;
-  position: absolute !important;
+  position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  /* Respect safe areas (notch, rounded corners) */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 body.mobile-device #unity-footer {
@@ -120,10 +168,8 @@ body.mobile-device #unity-footer {
 }
 
 body.mobile-device #unity-canvas {
-  /* Remove Unity's inline styles */
   width: 100% !important;
   height: 100% !important;
-  /* Force it to strictly keep its aspect ratio */
   max-width: 100% !important;
   max-height: 100% !important;
   aspect-ratio: 16 / 9 !important;
@@ -131,7 +177,9 @@ body.mobile-device #unity-canvas {
   flex-shrink: 0 !important;
 }
 
-/* ─── Controls Container ─── */
+/* ──────────────────────────────────────────────────
+   CONTROLS CONTAINER
+   ────────────────────────────────────────────────── */
 #mobile-controls-layer {
   display: none;
   position: fixed;
@@ -140,102 +188,341 @@ body.mobile-device #unity-canvas {
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
+  /* Respect safe areas */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
-/* Controls only visible when toggled ON */
 body.mobile-device.controls-active #mobile-controls-layer {
   display: block;
 }
 
-/* ─── Joystick Zone (Left Side) ─── */
+/* ──────────────────────────────────────────────────
+   JOYSTICK ZONE (Left Side)
+   ────────────────────────────────────────────────── */
 #joystick-zone {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 40%;
-  height: 60%;
+  width: 38%;
+  height: 65%;
   pointer-events: auto;
   touch-action: none;
 }
 
-/* ─── Action Buttons (Right Side) ─── */
+/* Override nipplejs default styling for premium look */
+#joystick-zone .front,
+.nipple .front {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.08), inset 0 0 10px rgba(255, 255, 255, 0.05) !important;
+}
+
+#joystick-zone .back,
+.nipple .back {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Joystick base visual hint (always visible when controls active) */
+#joystick-base-hint {
+  position: absolute;
+  left: 16%;
+  bottom: 18%;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, 50%);
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+#joystick-base-hint::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent);
+}
+
+#joystick-base-hint .hint-label {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ──────────────────────────────────────────────────
+   ACTION BUTTONS (Right Side) — Premium Circular
+   ────────────────────────────────────────────────── */
 #action-buttons {
   position: absolute;
-  right: 16px;
-  bottom: 16px;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: flex-end;
+  align-items: center;
   pointer-events: auto;
 }
 
 .action-btn {
-  width: 64px;
-  height: 64px;
+  position: relative;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-size: 11px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
   font-weight: 700;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 1.2;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  line-height: 1.1;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   touch-action: none;
   cursor: pointer;
-  transition: transform 0.1s, background 0.1s;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   pointer-events: auto;
   -webkit-user-select: none;
   user-select: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
+/* Subtle inner glow ring */
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+/* Icon container for SVG icons inside buttons */
+.action-btn .btn-icon {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 2px;
+  opacity: 0.9;
+}
+
+.action-btn .btn-label {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+/* ─── Pressed state ─── */
 .action-btn:active,
 .action-btn.pressed {
   transform: scale(0.88);
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.08);
 }
 
+/* ─── Primary action (Jump / Gas) — Accent color ─── */
 .action-btn.btn-primary-action {
-  width: 76px;
-  height: 76px;
-  font-size: 12px;
-  border-color: rgba(239, 68, 68, 0.6);
-  background: rgba(239, 68, 68, 0.2);
+  width: 68px;
+  height: 68px;
+  font-size: 11px;
+  border-color: rgba(0, 180, 220, 0.4);
+  background: radial-gradient(circle at 40% 35%, rgba(0, 180, 220, 0.22), rgba(0, 180, 220, 0.06));
+  color: rgba(180, 240, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 180, 220, 0.15), inset 0 1px 0 rgba(0, 180, 220, 0.1);
+}
+
+.action-btn.btn-primary-action::before {
+  border-color: rgba(0, 180, 220, 0.12);
 }
 
 .action-btn.btn-primary-action:active,
 .action-btn.btn-primary-action.pressed {
-  background: rgba(239, 68, 68, 0.5);
-  border-color: rgba(239, 68, 68, 0.9);
+  background: radial-gradient(circle at 40% 35%, rgba(0, 180, 220, 0.45), rgba(0, 180, 220, 0.15));
+  border-color: rgba(0, 180, 220, 0.7);
+  box-shadow: 0 0 24px rgba(0, 180, 220, 0.3);
 }
 
-/* Secondary row of buttons */
+/* ─── Fire button — Red accent ─── */
+.action-btn.btn-fire {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: radial-gradient(circle at 40% 35%, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+  color: rgba(255, 180, 180, 0.95);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.12), inset 0 1px 0 rgba(239, 68, 68, 0.08);
+}
+
+.action-btn.btn-fire::before {
+  border-color: rgba(239, 68, 68, 0.1);
+}
+
+.action-btn.btn-fire:active,
+.action-btn.btn-fire.pressed {
+  background: radial-gradient(circle at 40% 35%, rgba(239, 68, 68, 0.45), rgba(239, 68, 68, 0.15));
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.3);
+}
+
+/* ─── Aim button — Amber accent ─── */
+.action-btn.btn-aim {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: radial-gradient(circle at 40% 35%, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.04));
+  color: rgba(255, 220, 150, 0.95);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1), inset 0 1px 0 rgba(245, 158, 11, 0.06);
+}
+
+.action-btn.btn-aim::before {
+  border-color: rgba(245, 158, 11, 0.08);
+}
+
+.action-btn.btn-aim:active,
+.action-btn.btn-aim.pressed {
+  background: radial-gradient(circle at 40% 35%, rgba(245, 158, 11, 0.4), rgba(245, 158, 11, 0.12));
+  border-color: rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.25);
+}
+
+/* ─── Brake button — Orange accent ─── */
+.action-btn.btn-brake {
+  border-color: rgba(239, 115, 68, 0.35);
+  background: radial-gradient(circle at 40% 35%, rgba(239, 115, 68, 0.18), rgba(239, 115, 68, 0.05));
+  color: rgba(255, 200, 170, 0.95);
+}
+
+.action-btn.btn-brake:active,
+.action-btn.btn-brake.pressed {
+  background: radial-gradient(circle at 40% 35%, rgba(239, 115, 68, 0.45), rgba(239, 115, 68, 0.15));
+  border-color: rgba(239, 115, 68, 0.7);
+  box-shadow: 0 0 24px rgba(239, 115, 68, 0.3);
+}
+
+/* ─── Boost button — Purple accent ─── */
+.action-btn.btn-boost {
+  border-color: rgba(139, 92, 246, 0.35);
+  background: radial-gradient(circle at 40% 35%, rgba(139, 92, 246, 0.18), rgba(139, 92, 246, 0.05));
+  color: rgba(200, 180, 255, 0.95);
+}
+
+.action-btn.btn-boost:active,
+.action-btn.btn-boost.pressed {
+  background: radial-gradient(circle at 40% 35%, rgba(139, 92, 246, 0.45), rgba(139, 92, 246, 0.15));
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.3);
+}
+
+/* ─── Secondary buttons row ─── */
 #action-buttons-secondary {
   position: absolute;
-  right: 96px;
-  bottom: 20px;
+  right: calc(80px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   pointer-events: auto;
 }
 
 #action-buttons-secondary .action-btn {
-  width: 52px;
-  height: 52px;
-  font-size: 10px;
+  width: 46px;
+  height: 46px;
+  font-size: 9px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* ─── Keyboard Input Helper ─── */
+#action-buttons-secondary .action-btn:active,
+#action-buttons-secondary .action-btn.pressed {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ──────────────────────────────────────────────────
+   LOOK / AIM ZONE (Right Side — FPS)
+   ────────────────────────────────────────────────── */
+#look-zone {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 55%;
+  height: 55%;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* Subtle crosshair hint in look zone */
+#look-zone-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  opacity: 0.12;
+}
+
+#look-zone-hint::before,
+#look-zone-hint::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  border-radius: 1px;
+}
+
+#look-zone-hint::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+#look-zone-hint::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+/* Touch indicator that appears on look-zone drag */
+.look-touch-indicator {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.15s ease;
+  opacity: 0;
+}
+
+.look-touch-indicator.visible {
+  opacity: 1;
+}
+
+/* ──────────────────────────────────────────────────
+   KEYBOARD INPUT HELPER
+   ────────────────────────────────────────────────── */
 #mobile-keyboard-helper {
   position: fixed;
   top: 8px;
@@ -251,75 +538,249 @@ body.mobile-device #mobile-keyboard-helper {
 }
 
 #mobile-keyboard-helper .kb-toggle-btn {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 13px;
+  background: rgba(15, 17, 22, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+  padding: 7px 16px;
+  border-radius: 18px;
+  font-size: 11px;
   font-weight: 600;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   cursor: pointer;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   pointer-events: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#mobile-keyboard-helper .kb-toggle-btn:active {
+  transform: scale(0.95);
+  background: rgba(30, 34, 42, 0.9);
 }
 
 #mobile-keyboard-input {
   position: fixed;
-  top: 48px;
+  top: 44px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10002;
-  width: 280px;
-  padding: 12px 16px;
+  width: 260px;
+  padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(20, 20, 30, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 17, 22, 0.95);
   color: #fff;
-  font-size: 16px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 16px; /* Prevents iOS zoom */
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   outline: none;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 #mobile-keyboard-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
 }
 
-/* ─── Look/Aim Zone (Right Side - FPS only) ─── */
-#look-zone {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 55%;
-  height: 60%;
-  pointer-events: auto;
-  touch-action: none;
+#mobile-keyboard-input:focus {
+  border-color: rgba(0, 180, 220, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(0, 180, 220, 0.1);
 }
 
-/* ─── Mobile Performance Badge ─── */
+/* ──────────────────────────────────────────────────
+   MOBILE PERFORMANCE NOTICE
+   ────────────────────────────────────────────────── */
 #mobile-perf-notice {
   position: fixed;
-  bottom: 4px;
+  bottom: calc(3px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.6);
-  color: rgba(255, 255, 255, 0.5);
-  padding: 3px 12px;
-  border-radius: 10px;
-  font-size: 9px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.3);
+  padding: 2px 10px;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 500;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   pointer-events: none;
   display: none;
+  letter-spacing: 0.03em;
 }
 
 body.mobile-device #mobile-perf-notice {
   display: block;
+}
+
+/* ──────────────────────────────────────────────────
+   FULLSCREEN API BUTTON (shown on mobile)
+   ────────────────────────────────────────────────── */
+#mobile-fullscreen-btn {
+  display: none;
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10003;
+  background: rgba(15, 17, 22, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+#mobile-fullscreen-btn:active {
+  transform: scale(0.93);
+  background: rgba(30, 34, 42, 0.9);
+}
+
+body.mobile-device #mobile-fullscreen-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ──────────────────────────────────────────────────
+   ORIENTATION LOCK STYLES
+   ────────────────────────────────────────────────── */
+
+/* In portrait, hide game controls to avoid confusion */
+@media (orientation: portrait) {
+  body.mobile-device #mobile-controls-layer,
+  body.mobile-device #controls-toggle,
+  body.mobile-device #mobile-keyboard-helper,
+  body.mobile-device #mobile-fullscreen-btn,
+  body.mobile-device #mobile-perf-notice {
+    display: none !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   LANDSCAPE SMALL HEIGHT ADJUSTMENTS
+   (Phones in landscape have very limited height)
+   ────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 450px) {
+  #action-buttons {
+    gap: 6px;
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .action-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 9px;
+  }
+
+  .action-btn.btn-primary-action {
+    width: 58px;
+    height: 58px;
+    font-size: 10px;
+  }
+
+  #action-buttons-secondary {
+    right: calc(68px + env(safe-area-inset-right, 0px));
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 6px;
+  }
+
+  #action-buttons-secondary .action-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 8px;
+  }
+
+  #joystick-zone {
+    width: 35%;
+    height: 70%;
+  }
+
+  #joystick-base-hint {
+    width: 80px;
+    height: 80px;
+  }
+
+  #controls-toggle,
+  #mobile-fullscreen-btn {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  #mobile-keyboard-helper .kb-toggle-btn {
+    padding: 5px 12px;
+    font-size: 10px;
+  }
+}
+
+/* Very short screens (notch phones in landscape) */
+@media (orientation: landscape) and (max-height: 350px) {
+  .action-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 8px;
+  }
+
+  .action-btn.btn-primary-action {
+    width: 52px;
+    height: 52px;
+    font-size: 9px;
+  }
+
+  #action-buttons-secondary .action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 7px;
+  }
+
+  #action-buttons {
+    gap: 5px;
+  }
+
+  #action-buttons-secondary {
+    right: calc(58px + env(safe-area-inset-right, 0px));
+    gap: 5px;
+  }
+}
+
+/* ──────────────────────────────────────────────────
+   ANIMATIONS
+   ────────────────────────────────────────────────── */
+
+/* Fade in controls when toggled on */
+body.mobile-device.controls-active #mobile-controls-layer {
+  animation: fadeInControls 0.2s ease-out;
+}
+
+@keyframes fadeInControls {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Pulse for primary action button */
+.action-btn.btn-primary-action {
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(0, 180, 220, 0.15), inset 0 1px 0 rgba(0, 180, 220, 0.1); }
+  50% { box-shadow: 0 4px 28px rgba(0, 180, 220, 0.25), inset 0 1px 0 rgba(0, 180, 220, 0.15); }
 }
