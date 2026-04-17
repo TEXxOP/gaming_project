@@ -461,6 +461,7 @@
     var joystick = nipplejs.create({
       zone: zone,
       mode: 'dynamic',
+      position: { left: '22%', bottom: '28%' },
       color: 'rgba(255, 255, 255, 0.2)',
       size: joystickSize,
       fadeTime: 100,
