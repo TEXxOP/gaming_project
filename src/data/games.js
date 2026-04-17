@@ -4,10 +4,10 @@ export const games = [
         slug: 'fusion-karts',
         title: 'Fusion Karts',
         description: 'Fast-paced multiplayer kart racing with vibrant tracks and intense competition.',
-        thumbnail: '/games/WebGlBbuild/thumbnail.png',
+        thumbnail: '/games/fusion-cart/thumbnail.png',
         tags: ['Racing', 'Multiplayer'],
         releaseDate: '2024',
-        gamePath: 'WebGlBbuild'
+        gamePath: 'fusion-cart'
     },
     {
         id: 'project-vanguard',
