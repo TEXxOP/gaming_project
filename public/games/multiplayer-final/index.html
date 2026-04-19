@@ -6,7 +6,6 @@
     <title>Unity WebGL Player | FPS multiplayer</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <link rel="stylesheet" href="../mobile-controls.css">
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -58,11 +57,11 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Multiplayer-final.loader.js";
+      var loaderUrl = buildUrl + "/finallllllll multiplayer.loader.js";
       var config = {
-        dataUrl: buildUrl + "/Multiplayer-final.data.gz",
-        frameworkUrl: buildUrl + "/Multiplayer-final.framework.js.gz",
-        codeUrl: buildUrl + "/Multiplayer-final.wasm.gz",
+        dataUrl: buildUrl + "/finallllllll multiplayer.data",
+        frameworkUrl: buildUrl + "/finallllllll multiplayer.framework.js",
+        codeUrl: buildUrl + "/finallllllll multiplayer.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "FPS multiplayer",
@@ -96,8 +95,9 @@
         container.className = "unity-mobile";
         canvas.className = "unity-mobile";
 
-        // Lower canvas resolution on mobile for performance
-        config.devicePixelRatio = 1;
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
 
 
       } else {
@@ -127,6 +127,5 @@
       document.body.appendChild(script);
 
     </script>
-    <script src="../mobile-controls.js" data-game-type="fps"></script>
   </body>
 </html>
