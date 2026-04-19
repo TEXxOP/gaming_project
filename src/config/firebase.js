@@ -15,33 +15,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Detect mobile to choose the right auth strategy
-const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-// Standardized auth functions
+// Always try popup first (works on both desktop and modern mobile browsers).
+// Only fall back to redirect if popup is explicitly blocked.
 export const logInWithGoogle = async () => {
     try {
-        if (isMobileDevice) {
-            // Mobile: Use redirect to avoid popup blockers on Safari/Chrome mobile
-            await signInWithRedirect(auth, googleProvider);
-            // The result will be picked up by getRedirectResult in AuthContext
-            return null;
-        } else {
-            // Desktop: Popup works reliably
-            const result = await signInWithPopup(auth, googleProvider);
-            return result.user;
-        }
+        const result = await signInWithPopup(auth, googleProvider);
+        return result.user;
     } catch (error) {
-        console.error("Error signing in with Google", error);
-        // Fallback: if popup fails on desktop, try redirect
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-            try {
-                await signInWithRedirect(auth, googleProvider);
-                return null;
-            } catch (redirectError) {
-                console.error("Redirect also failed", redirectError);
-                throw redirectError;
-            }
+        console.error("Error signing in with Google:", error.code);
+        // Fallback to redirect ONLY if popup was blocked
+        if (error.code === 'auth/popup-blocked') {
+            console.log("Popup blocked, falling back to redirect...");
+            await signInWithRedirect(auth, googleProvider);
+            return null;
         }
         throw error;
     }

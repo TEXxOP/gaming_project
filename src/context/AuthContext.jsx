@@ -11,13 +11,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Handle redirect result (mobile auth flow)
-    getRedirectResult(auth).then((result) => {
-      if (result && result.user) {
-        setUser(result.user);
+    // Handle redirect result (fallback auth flow)
+    getRedirectResult(auth).catch((error) => {
+      if (error.code !== 'auth/redirect-cancelled-by-user') {
+        console.error("Redirect auth error:", error);
       }
-    }).catch((error) => {
-      console.error("Redirect auth error:", error);
     });
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
