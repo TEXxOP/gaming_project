@@ -45,7 +45,7 @@
   width: 100%;
   height: 100%;
   border: none;
-  transition: opacity 1s ease;
+  transition: opacity 0.8s ease;
 }
 
 .game-iframe.hidden {
@@ -63,7 +63,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--bg-primary);
+  background: var(--bg-primary, #101216);
   z-index: 10;
 }
 
@@ -103,12 +103,18 @@
   font-size: 13px;
   font-weight: 600;
   border: 1px solid var(--border-color);
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast), transform 0.1s;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95) !important;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .game-error {
@@ -147,12 +153,16 @@
     font-size: 11px;
     padding: 6px 10px;
     border-radius: 6px;
+    min-height: 36px;
+    min-width: auto;
   }
 
   .game-top-bar .maximize-btn {
     font-size: 11px;
     padding: 6px 10px;
     border-radius: 6px;
+    min-height: 36px;
+    min-width: auto;
   }
 
   .live-title {
@@ -176,7 +186,7 @@
     min-height: 0;
     border-radius: 8px;
     /* Take remaining space */
-    height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 48px) - 80px);
+    height: calc(100dvh - var(--header-height, 52px) - var(--footer-height, 36px) - 80px);
   }
 
   .loader-spinner {
@@ -211,9 +221,10 @@
     gap: 0;
     padding: 0;
     height: 100vh;
+    height: 100dvh;
     /* Override any parent padding */
-    margin: -16px;
-    width: calc(100% + 32px);
+    margin: -8px;
+    width: calc(100% + 16px);
   }
 
   .game-top-bar {
@@ -224,25 +235,21 @@
     z-index: 50;
     border-radius: 0;
     padding: 4px 12px;
-    background: rgba(11, 13, 16, 0.9);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(11, 13, 16, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    /* Fade out after 3 seconds */
+    /* Smooth auto-hide */
     opacity: 1;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(0);
   }
 
   .game-top-bar.auto-hidden {
     opacity: 0;
+    transform: translateY(-100%);
     pointer-events: none;
-  }
-
-  .game-top-bar:hover,
-  .game-top-bar:active {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   .live-title {
@@ -253,6 +260,8 @@
     padding: 4px 8px;
     font-size: 10px;
     border-radius: 4px;
+    min-height: 32px;
+    min-width: auto;
   }
 
   .iframe-container {
@@ -262,7 +271,9 @@
     border: none;
     z-index: 1;
     min-height: 100vh;
+    min-height: 100dvh;
     height: 100vh;
+    height: 100dvh;
   }
 
   .iframe-container.glass-panel {

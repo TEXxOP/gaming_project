@@ -1,6 +1,7 @@
 .landing-auth-split {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-page, #101216);
 }
 
@@ -76,16 +77,22 @@
   gap: 12px;
   width: 100%;
   padding: 14px 24px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 15px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
   cursor: pointer;
   border: none;
+  min-height: 52px;
 }
 
 .btn-solid-login:hover {
   background-color: #e0e0e0;
+}
+
+.btn-solid-login:active {
+  transform: scale(0.97) !important;
+  background-color: #d0d0d0;
 }
 
 .google-icon {
@@ -93,24 +100,89 @@
   height: 20px;
 }
 
+/* ─── Mobile: Stack vertically ─── */
 @media (max-width: 900px) {
   .landing-auth-split {
     flex-direction: column;
   }
+
   .auth-hero-image {
     flex: none;
-    height: 40vh;
+    height: 35vh;
+    height: 35dvh;
   }
+
   .auth-form-side {
     width: 100%;
     flex: 1;
     border-left: none;
     border-top: 1px solid var(--border-color, #242731);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
+
   .auth-hero-overlay {
-    padding: 32px;
+    padding: 24px;
   }
+
   .auth-hero-overlay h2 {
-    font-size: 32px;
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .auth-hero-overlay p {
+    font-size: 14px;
+  }
+
+  .login-box {
+    padding: 32px 24px;
+    animation: fadeInUp 0.5s ease-out both;
+    animation-delay: 0.15s;
+  }
+
+  .login-title {
+    font-size: 22px;
+  }
+
+  .login-sub {
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  .btn-solid-login {
+    padding: 16px 24px;
+    font-size: 16px;
+    border-radius: 12px;
+    min-height: 56px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .auth-hero-image {
+    height: 28vh;
+  }
+
+  .auth-hero-overlay h2 {
+    font-size: 24px;
+  }
+
+  .login-box {
+    padding: 24px 16px;
+  }
+
+  .factory-icon-large {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

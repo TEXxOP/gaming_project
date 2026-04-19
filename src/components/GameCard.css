@@ -7,6 +7,7 @@
   cursor: pointer;
   box-shadow: var(--shadow-card);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .game-card:hover {
@@ -18,12 +19,18 @@
   width: 100%;
   aspect-ratio: 16/9;
   overflow: hidden;
+  background: var(--bg-sidebar);
 }
 
 .card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.game-card:active .card-image {
+  transform: scale(1.02);
 }
 
 .card-info {
@@ -83,6 +90,12 @@
 @media (max-width: 768px) {
   .game-card:hover {
     transform: none;  /* Disable hover lift on touch devices */
+  }
+
+  /* Active press feedback instead of hover */
+  .game-card:active {
+    transform: scale(0.98) !important;
+    transition: transform 0.08s ease;
   }
 
   .card-info {

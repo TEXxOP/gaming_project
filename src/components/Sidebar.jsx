@@ -9,30 +9,11 @@ const Sidebar = ({ isOpen, onClose }) => {
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <nav className="sidebar-nav">
-        <NavLink to="/" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
-          <span className="nav-icon">🏠</span>
-          HOME
-        </NavLink>
-        
-        <div className="nav-divider"></div>
-        
         <NavLink to="/games" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
-          <span className="nav-icon">🎲</span>
-          WEBGL GAMES
+          <span className="nav-icon">🎮</span>
+          ALL GAMES
         </NavLink>
-        <NavLink to="/mobile" className="nav-item">
-          <span className="nav-icon">📱</span>
-          WEBGL MOBILE GAMES
-        </NavLink>
-        <NavLink to="/android" className="nav-item">
-          <span className="nav-icon">🤖</span>
-          ANDROID GAMES
-        </NavLink>
-        <NavLink to="/ios" className="nav-item">
-          <span className="nav-icon">🍏</span>
-          IOS GAMES
-        </NavLink>
-
+        
         <div className="nav-divider"></div>
         
         {user ? (
@@ -41,16 +22,10 @@ const Sidebar = ({ isOpen, onClose }) => {
              LOGOUT ({user.displayName?.split(' ')[0]})
           </div>
         ) : (
-          <>
-            <div className="nav-item" onClick={logInWithGoogle} style={{cursor: 'pointer'}}>
-              <span className="nav-icon">👤</span>
-              LOGIN
-            </div>
-            <div className="nav-item" onClick={logInWithGoogle} style={{cursor: 'pointer'}}>
-              <span className="nav-icon">➕</span>
-              REGISTER
-            </div>
-          </>
+          <div className="nav-item" onClick={logInWithGoogle} style={{cursor: 'pointer'}}>
+            <span className="nav-icon">👤</span>
+            LOGIN
+          </div>
         )}
       </nav>
     </aside>

@@ -10,32 +10,47 @@ const GamePage = () => {
   const iframeRef = useRef(null);
   const topBarRef = useRef(null);
   const hideTimerRef = useRef(null);
+  const touchStartY = useRef(null);
 
   const handleFullscreen = () => {
-    if (iframeRef.current) {
-      if (iframeRef.current.requestFullscreen) {
-        iframeRef.current.requestFullscreen();
-      } else if (iframeRef.current.webkitRequestFullscreen) {
-        iframeRef.current.webkitRequestFullscreen();
-      } else if (iframeRef.current.msRequestFullscreen) {
-        iframeRef.current.msRequestFullscreen();
+    try {
+      const target = document.documentElement;
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } else {
+        if (target.requestFullscreen) target.requestFullscreen().catch(() => {});
+        else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
       }
+    } catch (e) {
+      // iOS Safari throws synchronously — silently ignore
+      console.warn('Fullscreen not supported:', e.message);
     }
   };
 
   const game = games.find(g => g.slug === slug);
 
-  // Simulate iframe loading time
+  // Listen for actual iframe load event
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const handleLoad = () => setLoading(false);
+    iframe.addEventListener('load', handleLoad);
+
+    // Fallback timeout in case load event doesn't fire
+    const fallback = setTimeout(() => setLoading(false), 6000);
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+      clearTimeout(fallback);
+    };
   }, [slug]);
 
-  // Auto-hide top bar in landscape on mobile
+  // Mobile detection
   const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  // Auto-hide top bar in landscape on mobile
   const resetHideTimer = useCallback(() => {
     if (!topBarRef.current || !isMobile) return;
     topBarRef.current.classList.remove('auto-hidden');
@@ -44,7 +59,7 @@ const GamePage = () => {
       if (topBarRef.current && window.innerWidth > window.innerHeight) {
         topBarRef.current.classList.add('auto-hidden');
       }
-    }, 4000);
+    }, 3000);
   }, [isMobile]);
 
   useEffect(() => {
@@ -53,6 +68,16 @@ const GamePage = () => {
     const handleOrientationChange = () => {
       if (window.innerWidth > window.innerHeight) {
         resetHideTimer();
+        // Auto-attempt fullscreen on landscape (safely)
+        try {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+          }
+        } catch (e) {
+          // iOS doesn't support fullscreen — ignore
+        }
       } else if (topBarRef.current) {
         topBarRef.current.classList.remove('auto-hidden');
         clearTimeout(hideTimerRef.current);
@@ -68,12 +93,35 @@ const GamePage = () => {
       topBarRef.current.addEventListener('touchstart', handleTopBarTouch, { passive: true });
     }
 
+    // Swipe down from top edge to reveal bar
+    const handleSwipeStart = (e) => {
+      const touch = e.touches[0];
+      if (touch.clientY < 30) {
+        touchStartY.current = touch.clientY;
+      }
+    };
+    const handleSwipeEnd = (e) => {
+      if (touchStartY.current !== null) {
+        const dy = e.changedTouches[0].clientY - touchStartY.current;
+        if (dy > 40 && topBarRef.current) {
+          topBarRef.current.classList.remove('auto-hidden');
+          resetHideTimer();
+        }
+        touchStartY.current = null;
+      }
+    };
+
+    document.addEventListener('touchstart', handleSwipeStart, { passive: true });
+    document.addEventListener('touchend', handleSwipeEnd, { passive: true });
+
     // Initial check
     handleOrientationChange();
 
     return () => {
       window.removeEventListener('resize', handleOrientationChange);
       window.removeEventListener('orientationchange', handleOrientationChange);
+      document.removeEventListener('touchstart', handleSwipeStart);
+      document.removeEventListener('touchend', handleSwipeEnd);
       clearTimeout(hideTimerRef.current);
     };
   }, [isMobile, resetHideTimer]);

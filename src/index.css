@@ -11,11 +11,21 @@
   color-scheme: dark;
 }
 
+html {
+  /* Eliminate 300ms tap delay globally */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior: none;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport for mobile browser chrome */
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -42,29 +52,45 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Mobile Global Styles ─── */
 @media (max-width: 768px) {
-  html {
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: none;
-  }
-
   body {
-    -webkit-text-size-adjust: 100%;
     padding-bottom: env(safe-area-inset-bottom);
+    /* Native-like momentum scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Hide scrollbar for cleaner mobile UI */
+  /* Thinner scrollbar for cleaner mobile UI */
   ::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
   }
 
   /* Ensure text doesn't overflow containers */
   h1, h2, h3, h4, p, span {
     overflow-wrap: break-word;
     word-break: break-word;
+  }
+
+  /* All interactive elements need comfortable touch targets */
+  button, a, [role="button"] {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+
+  /* Active press feedback for buttons */
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 0.08s ease;
+  }
+}
+
+/* ─── Very small phones (iPhone SE, etc.) ─── */
+@media (max-width: 380px) {
+  :root {
+    font-size: 14px;
   }
 }
 
@@ -73,4 +99,25 @@ h1, h2, h3, h4, h5, h6 {
   html {
     scroll-behavior: smooth;
   }
+}
+
+/* ─── Utility animations ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 4px rgba(0, 212, 170, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(0, 212, 170, 0.7); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
 }

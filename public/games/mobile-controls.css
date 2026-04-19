@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════
-   MOBILE CONTROLS OVERLAY — Premium Edition
+   MOBILE CONTROLS OVERLAY — Premium Edition v2
    For Unity WebGL games on mobile devices.
    Controls auto-activate on landscape, with polished
-   glassmorphic UI and optimized touch targets.
+   glassmorphic UI, FIXED joystick, and optimized touch targets.
    ═══════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap');
@@ -146,7 +146,6 @@ html, body {
 }
 
 body.mobile-device {
-  /* Lock to landscape visual cues */
   touch-action: none;
 }
 
@@ -159,7 +158,6 @@ body.mobile-device #unity-container {
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  /* Respect safe areas (notch, rounded corners) */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -188,23 +186,23 @@ body.mobile-device #unity-canvas {
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
-  /* Respect safe areas */
   padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
 body.mobile-device.controls-active #mobile-controls-layer {
   display: block;
+  animation: fadeInControls 0.2s ease-out;
 }
 
 /* ──────────────────────────────────────────────────
-   JOYSTICK ZONE (Left Side)
+   JOYSTICK ZONE — FIXED Bottom-Left
    ────────────────────────────────────────────────── */
 #joystick-zone {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 38%;
-  height: 65%;
+  width: 40%;
+  height: 70%;
   pointer-events: auto;
   touch-action: none;
 }
@@ -212,53 +210,16 @@ body.mobile-device.controls-active #mobile-controls-layer {
 /* Override nipplejs default styling for premium look */
 #joystick-zone .front,
 .nipple .front {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
-  border: 2px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.08), inset 0 0 10px rgba(255, 255, 255, 0.05) !important;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.06) !important;
 }
 
 #joystick-zone .back,
 .nipple .back {
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.03) !important;
-}
-
-/* Joystick base visual hint (always visible when controls active) */
-#joystick-base-hint {
-  position: absolute;
-  left: 16%;
-  bottom: 18%;
-  width: 100px;
-  height: 100px;
-  transform: translate(-50%, 50%);
-  border-radius: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
-}
-
-#joystick-base-hint::after {
-  content: '';
-  position: absolute;
-  inset: 30%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent);
-}
-
-#joystick-base-hint .hint-label {
-  position: absolute;
-  bottom: -22px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  color: rgba(255, 255, 255, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.04) !important;
 }
 
 /* ──────────────────────────────────────────────────
@@ -270,7 +231,7 @@ body.mobile-device.controls-active #mobile-controls-layer {
   bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   pointer-events: auto;
 }
@@ -287,6 +248,7 @@ body.mobile-device.controls-active #mobile-controls-layer {
   font-weight: 700;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -295,7 +257,7 @@ body.mobile-device.controls-active #mobile-controls-layer {
   -webkit-backdrop-filter: blur(12px);
   touch-action: none;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   pointer-events: auto;
@@ -315,7 +277,29 @@ body.mobile-device.controls-active #mobile-controls-layer {
   pointer-events: none;
 }
 
-/* Icon container for SVG icons inside buttons */
+/* Haptic ripple animation */
+.action-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+.action-btn.pressed::after {
+  animation: btnRipple 0.3s ease-out;
+}
+
+@keyframes btnRipple {
+  0% { transform: scale(0); opacity: 0.4; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Icon container */
 .action-btn .btn-icon {
   width: 20px;
   height: 20px;
@@ -429,11 +413,11 @@ body.mobile-device.controls-active #mobile-controls-layer {
 /* ─── Secondary buttons row ─── */
 #action-buttons-secondary {
   position: absolute;
-  right: calc(80px + env(safe-area-inset-right, 0px));
+  right: calc(84px + env(safe-area-inset-right, 0px));
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   pointer-events: auto;
 }
 
@@ -466,58 +450,48 @@ body.mobile-device.controls-active #mobile-controls-layer {
   touch-action: none;
 }
 
-/* Subtle crosshair hint in look zone */
-#look-zone-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-  opacity: 0.12;
-}
-
-#look-zone-hint::before,
-#look-zone-hint::after {
-  content: '';
-  position: absolute;
-  background: #fff;
-  border-radius: 1px;
-}
-
-#look-zone-hint::before {
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  transform: translateY(-50%);
-}
-
-#look-zone-hint::after {
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  transform: translateX(-50%);
-}
-
 /* Touch indicator that appears on look-zone drag */
 .look-touch-indicator {
-  position: absolute;
+  position: fixed;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent);
   pointer-events: none;
   transform: translate(-50%, -50%);
   transition: opacity 0.15s ease;
   opacity: 0;
+  z-index: 10001;
 }
 
 .look-touch-indicator.visible {
   opacity: 1;
+}
+
+/* Crosshair inside touch indicator */
+.look-touch-indicator::before,
+.look-touch-indicator::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 1px;
+}
+
+.look-touch-indicator::before {
+  top: 50%;
+  left: 25%;
+  right: 25%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.look-touch-indicator::after {
+  left: 50%;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  transform: translateX(-50%);
 }
 
 /* ──────────────────────────────────────────────────
@@ -621,7 +595,7 @@ body.mobile-device #mobile-perf-notice {
 }
 
 /* ──────────────────────────────────────────────────
-   FULLSCREEN API BUTTON (shown on mobile)
+   FULLSCREEN API BUTTON
    ────────────────────────────────────────────────── */
 #mobile-fullscreen-btn {
   display: none;
@@ -676,11 +650,10 @@ body.mobile-device #mobile-fullscreen-btn {
 
 /* ──────────────────────────────────────────────────
    LANDSCAPE SMALL HEIGHT ADJUSTMENTS
-   (Phones in landscape have very limited height)
    ────────────────────────────────────────────────── */
 @media (orientation: landscape) and (max-height: 450px) {
   #action-buttons {
-    gap: 6px;
+    gap: 8px;
     right: calc(12px + env(safe-area-inset-right, 0px));
     bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
@@ -700,7 +673,7 @@ body.mobile-device #mobile-fullscreen-btn {
   #action-buttons-secondary {
     right: calc(68px + env(safe-area-inset-right, 0px));
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    gap: 6px;
+    gap: 8px;
   }
 
   #action-buttons-secondary .action-btn {
@@ -710,13 +683,8 @@ body.mobile-device #mobile-fullscreen-btn {
   }
 
   #joystick-zone {
-    width: 35%;
-    height: 70%;
-  }
-
-  #joystick-base-hint {
-    width: 80px;
-    height: 80px;
+    width: 38%;
+    height: 75%;
   }
 
   #controls-toggle,
@@ -739,6 +707,11 @@ body.mobile-device #mobile-fullscreen-btn {
     font-size: 8px;
   }
 
+  .action-btn .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
   .action-btn.btn-primary-action {
     width: 52px;
     height: 52px;
@@ -752,12 +725,12 @@ body.mobile-device #mobile-fullscreen-btn {
   }
 
   #action-buttons {
-    gap: 5px;
+    gap: 6px;
   }
 
   #action-buttons-secondary {
     right: calc(58px + env(safe-area-inset-right, 0px));
-    gap: 5px;
+    gap: 6px;
   }
 }
 
@@ -765,17 +738,12 @@ body.mobile-device #mobile-fullscreen-btn {
    ANIMATIONS
    ────────────────────────────────────────────────── */
 
-/* Fade in controls when toggled on */
-body.mobile-device.controls-active #mobile-controls-layer {
-  animation: fadeInControls 0.2s ease-out;
-}
-
 @keyframes fadeInControls {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-/* Pulse for primary action button */
+/* Subtle pulse for primary action button */
 .action-btn.btn-primary-action {
   animation: subtlePulse 3s ease-in-out infinite;
 }

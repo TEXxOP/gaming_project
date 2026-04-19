@@ -37,9 +37,16 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 100%;
+  width: var(--touch-target-comfortable, 48px);
+  height: var(--touch-target-comfortable, 48px);
   color: #fff;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-menu:active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .hamburger {
@@ -95,6 +102,12 @@
 }
 
 @media (max-width: 768px) {
+  .app-header {
+    padding: 0 8px;
+    padding-left: calc(8px + env(safe-area-inset-left, 0px));
+    padding-right: calc(8px + env(safe-area-inset-right, 0px));
+  }
+
   .btn-close-desktop {
     display: none;
   }
@@ -105,6 +118,11 @@
 
   .header-brand h1 {
     font-size: 14px;
+  }
+
+  .header-brand {
+    margin-left: 4px;
+    gap: 8px;
   }
 
   .factory-icon {

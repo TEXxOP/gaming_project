@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -8,6 +8,8 @@ import './Layout.css';
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -22,6 +24,42 @@ const Layout = () => {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
+
+  // Swipe gesture: left-edge swipe to open, swipe-left to close
+  const handleTouchStart = useCallback((e) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX.current;
+    const dy = Math.abs(touch.clientY - touchStartY.current);
+
+    // Only horizontal swipes (dx > 60px, dy < 50px)
+    if (Math.abs(dx) > 60 && dy < 50) {
+      if (dx > 0 && touchStartX.current < 30 && !sidebarOpen) {
+        // Swipe right from left edge → open
+        setSidebarOpen(true);
+      } else if (dx < 0 && sidebarOpen) {
+        // Swipe left → close
+        setSidebarOpen(false);
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchEnd]);
 
   return (
     <div className="layout-root">

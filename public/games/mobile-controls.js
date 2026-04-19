@@ -1,9 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════
- * MOBILE CONTROLS — Premium Edition
- * Virtual joystick, action buttons, keyboard helper,
- * look-aim zone, fullscreen, and orientation lock
- * for Unity WebGL games on mobile.
+ * MOBILE CONTROLS — Premium Edition v2
+ * Virtual joystick (FIXED position), action buttons,
+ * keyboard helper, look-aim zone, fullscreen, and
+ * orientation lock for Unity WebGL games on mobile.
+ *
+ * KEY CHANGES:
+ * - Joystick is FIXED in bottom-left (not dynamic)
+ * - Controls auto-activate in landscape
+ * - Fire ONLY triggers on fire button press
+ * - Throttled mouse move events (60fps max)
+ * - Sensitivity saved to localStorage
  *
  * Usage: Add to game HTML with:
  *   <link rel="stylesheet" href="../mobile-controls.css">
@@ -37,13 +44,10 @@
     init();
   }
 
-  var controlsActive = false;
-
   function init() {
-    console.log('[MobileControls] Initializing...');
+    console.log('[MobileControls] Initializing v2...');
     setViewportMeta();
     injectHTML();
-    setupControlsToggle();
     setupFullscreenButton();
     setupOrientationHandler();
     loadNippleJS(function () {
@@ -61,7 +65,6 @@
   // SET VIEWPORT META FOR MOBILE
   // ═══════════════════════════════════════════════
   function setViewportMeta() {
-    // Remove existing viewport meta to avoid conflicts
     var existing = document.querySelector('meta[name="viewport"]');
     if (existing) existing.remove();
 
@@ -79,7 +82,6 @@
     ].join(', ');
     document.head.appendChild(meta);
 
-    // Prevent iOS Safari elastic bounce
     document.body.style.overscrollBehavior = 'none';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -90,15 +92,13 @@
   }
 
   // ═══════════════════════════════════════════════
-  // PREVENT DEFAULT GESTURES (pinch, double-tap zoom)
+  // PREVENT DEFAULT GESTURES
   // ═══════════════════════════════════════════════
   function preventDefaultGestures() {
-    // Prevent pinch zoom
     document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
     document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
     document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
 
-    // Prevent double-tap zoom on the whole document
     var lastTap = 0;
     document.addEventListener('touchend', function(e) {
       var now = Date.now();
@@ -108,7 +108,6 @@
       lastTap = now;
     }, { passive: false });
 
-    // Prevent context menu on long press
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
     }, { passive: false });
@@ -117,43 +116,49 @@
   }
 
   // ═══════════════════════════════════════════════
-  // ORIENTATION HANDLER
+  // ORIENTATION HANDLER — Auto-activate in landscape
   // ═══════════════════════════════════════════════
   function setupOrientationHandler() {
-    // Try to lock orientation to landscape
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function(err) {
         console.log('[MobileControls] Could not lock orientation:', err.message);
       });
     }
 
-    // Handle orientation changes
     function onOrientationChange() {
       var isLandscape = window.innerWidth > window.innerHeight;
       console.log('[MobileControls] Orientation:', isLandscape ? 'landscape' : 'portrait');
 
       if (isLandscape) {
-        // Force re-layout after rotation
+        // AUTO-ACTIVATE controls in landscape
+        document.body.classList.add('controls-active');
+        var toggleBtn = document.getElementById('controls-toggle');
+        if (toggleBtn) toggleBtn.classList.add('active');
+
         setTimeout(function() {
           window.scrollTo(0, 0);
-          // Trigger resize for Unity canvas
           window.dispatchEvent(new Event('resize'));
         }, 100);
+      } else {
+        // Deactivate in portrait
+        document.body.classList.remove('controls-active');
+        var toggleBtn2 = document.getElementById('controls-toggle');
+        if (toggleBtn2) toggleBtn2.classList.remove('active');
       }
     }
 
     window.addEventListener('orientationchange', onOrientationChange);
     window.addEventListener('resize', function() {
-      // Debounced resize handler
       clearTimeout(window._mobileResizeTimer);
       window._mobileResizeTimer = setTimeout(function() {
         window.scrollTo(0, 0);
+        onOrientationChange();
       }, 150);
     });
 
     // Initial check
     onOrientationChange();
-    console.log('[MobileControls] Orientation handler ready');
+    console.log('[MobileControls] Orientation handler ready (auto-activate)');
   }
 
   // ═══════════════════════════════════════════════
@@ -185,21 +190,10 @@
     joystickZone.id = 'joystick-zone';
     controlsLayer.appendChild(joystickZone);
 
-    // Joystick base visual hint
-    var joystickHint = document.createElement('div');
-    joystickHint.id = 'joystick-base-hint';
-    joystickHint.innerHTML = '<span class="hint-label">MOVE</span>';
-    controlsLayer.appendChild(joystickHint);
-
     // Look zone (FPS only)
     if (gameType === 'fps') {
       var lookZone = document.createElement('div');
       lookZone.id = 'look-zone';
-      // Add crosshair hint
-      var lookHint = document.createElement('div');
-      lookHint.id = 'look-zone-hint';
-      lookZone.appendChild(lookHint);
-      // Add touch indicator
       var touchIndicator = document.createElement('div');
       touchIndicator.className = 'look-touch-indicator';
       touchIndicator.id = 'look-touch-indicator';
@@ -309,6 +303,14 @@
     var toggleBtn = document.createElement('button');
     toggleBtn.id = 'controls-toggle';
     toggleBtn.innerHTML = '<span class="toggle-icon"></span> Controls';
+    toggleBtn.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var isActive = document.body.classList.toggle('controls-active');
+      toggleBtn.classList.toggle('active', isActive);
+      console.log('[MobileControls] Controls', isActive ? 'ON' : 'OFF');
+    }, { passive: false });
+    toggleBtn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); });
     document.body.appendChild(toggleBtn);
 
     console.log('[MobileControls] HTML injected');
@@ -327,56 +329,15 @@
 
       var elem = document.documentElement;
       if (document.fullscreenElement || document.webkitFullscreenElement) {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       } else {
-        // Enter fullscreen
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-          elem.webkitRequestFullscreen();
-        }
+        if (elem.requestFullscreen) elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
       }
     }, { passive: false });
 
     console.log('[MobileControls] Fullscreen button ready');
-  }
-
-  // ═══════════════════════════════════════════════
-  // CONTROLS TOGGLE (show/hide virtual controls)
-  // ═══════════════════════════════════════════════
-  function setupControlsToggle() {
-    var toggleBtn = document.getElementById('controls-toggle');
-    if (!toggleBtn) return;
-
-    toggleBtn.addEventListener('touchstart', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      controlsActive = !controlsActive;
-
-      if (controlsActive) {
-        document.body.classList.add('controls-active');
-        toggleBtn.classList.add('active');
-      } else {
-        document.body.classList.remove('controls-active');
-        toggleBtn.classList.remove('active');
-      }
-
-      console.log('[MobileControls] Controls', controlsActive ? 'ON' : 'OFF');
-    }, { passive: false });
-
-    // Prevent click bubbling
-    toggleBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    console.log('[MobileControls] Toggle button ready');
   }
 
   // ═══════════════════════════════════════════════
@@ -404,7 +365,6 @@
       };
       alt.onerror = function() {
         console.error('[MobileControls] Failed to load nipplejs from all CDNs');
-        // Fallback: show basic D-pad
         createFallbackDpad();
       };
       document.head.appendChild(alt);
@@ -413,7 +373,7 @@
   }
 
   // ═══════════════════════════════════════════════
-  // FALLBACK D-PAD (when nipplejs fails to load)
+  // FALLBACK D-PAD
   // ═══════════════════════════════════════════════
   function createFallbackDpad() {
     var zone = document.getElementById('joystick-zone');
@@ -438,7 +398,7 @@
   }
 
   // ═══════════════════════════════════════════════
-  // VIRTUAL JOYSTICK (WASD)
+  // VIRTUAL JOYSTICK — FIXED POSITION (bottom-left)
   // ═══════════════════════════════════════════════
   function setupJoystick() {
     if (!window.nipplejs) {
@@ -454,19 +414,18 @@
 
     var activeKeys = {};
 
-    // Calculate joystick size based on screen height
-    var screenH = Math.min(window.innerHeight, window.innerWidth);
-    var joystickSize = Math.max(90, Math.min(130, screenH * 0.35));
+    // Fixed joystick size
+    var joystickSize = 120;
 
     var joystick = nipplejs.create({
       zone: zone,
-      mode: 'dynamic',
-      position: { left: '22%', bottom: '28%' },
+      mode: 'static',                    // ← FIXED, not dynamic
+      position: { left: '80px', bottom: '80px' },  // ← Fixed bottom-left
       color: 'rgba(255, 255, 255, 0.2)',
       size: joystickSize,
-      fadeTime: 100,
-      restOpacity: 0.5,
-      threshold: 0.15,
+      fadeTime: 0,                        // No fade — always visible
+      restOpacity: 0.65,
+      threshold: 0.12,
       multitouch: true
     });
 
@@ -476,13 +435,6 @@
       left:  { key: 'a', code: 'KeyA', keyCode: 65 },
       right: { key: 'd', code: 'KeyD', keyCode: 68 }
     };
-
-    // Hide joystick hint while using joystick
-    var hint = document.getElementById('joystick-base-hint');
-
-    joystick.on('start', function() {
-      if (hint) hint.style.opacity = '0';
-    });
 
     joystick.on('move', function (evt, data) {
       if (!data.direction) return;
@@ -517,26 +469,15 @@
           activeKeys[dir] = false;
         }
       });
-      if (hint) hint.style.opacity = '0.6';
     });
 
-    // Recalculate joystick size on orientation change
-    window.addEventListener('resize', function() {
-      var newH = Math.min(window.innerHeight, window.innerWidth);
-      var newSize = Math.max(90, Math.min(130, newH * 0.35));
-      if (joystick && joystick[0]) {
-        joystick[0].options.size = newSize;
-      }
-    });
-
-    console.log('[MobileControls] Joystick ready (size:', joystickSize + 'px)');
+    console.log('[MobileControls] Joystick ready — FIXED position, size:', joystickSize + 'px');
   }
 
   // ═══════════════════════════════════════════════
-  // ACTION BUTTONS (Fire, Jump, etc.)
+  // ACTION BUTTONS — Fire ONLY on fire button press
   // ═══════════════════════════════════════════════
   function setupActionButtons() {
-    // Track active touches per button to handle multi-touch properly
     var activeTouches = new Map();
 
     document.addEventListener('touchstart', handleBtnTouch, { passive: false });
@@ -556,9 +497,10 @@
 
         // Haptic feedback if available
         if (navigator.vibrate) {
-          navigator.vibrate(15);
+          navigator.vibrate(12);
         }
 
+        // Keyboard key simulation
         if (btn.dataset.key !== undefined && btn.dataset.key !== '') {
           simulateKey(
             btn.dataset.key,
@@ -568,6 +510,7 @@
           );
         }
 
+        // Mouse button simulation — ONLY from explicit button press
         if (btn.dataset.mouse === 'left') {
           simulateMouse('mousedown', 0);
         } else if (btn.dataset.mouse === 'right') {
@@ -611,11 +554,12 @@
       }
     }
 
-    console.log('[MobileControls] Action buttons ready');
+    console.log('[MobileControls] Action buttons ready — fire only on explicit press');
   }
 
   // ═══════════════════════════════════════════════
-  // LOOK / AIM ZONE (Mouse simulation for FPS)
+  // LOOK / AIM ZONE — Mouse move ONLY (no click/fire)
+  // Throttled to 60fps for performance
   // ═══════════════════════════════════════════════
   function setupLookZone() {
     if (gameType !== 'fps') return;
@@ -625,8 +569,14 @@
 
     var touchIndicator = document.getElementById('look-touch-indicator');
     var lastTouch = null;
-    var sensitivity = 2.5;
     var activeTouchId = null;
+
+    // Load sensitivity from localStorage or use default
+    var sensitivity = parseFloat(localStorage.getItem('mc_sensitivity')) || 2.5;
+
+    // Throttle: max 60fps for mouse move events
+    var lastMoveTime = 0;
+    var THROTTLE_MS = 16; // ~60fps
 
     lookZone.addEventListener('touchstart', function (e) {
       e.preventDefault();
@@ -640,13 +590,19 @@
         touchIndicator.style.top = touch.clientY + 'px';
         touchIndicator.classList.add('visible');
       }
+
+      // NO mouse click here — fire ONLY from fire button
     }, { passive: false });
 
     lookZone.addEventListener('touchmove', function (e) {
       e.preventDefault();
       if (activeTouchId === null || !lastTouch) return;
 
-      // Find the active touch
+      // Throttle to 60fps
+      var now = performance.now();
+      if (now - lastMoveTime < THROTTLE_MS) return;
+      lastMoveTime = now;
+
       var touch = null;
       for (var i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
@@ -675,7 +631,6 @@
         }));
       }
 
-      // Update touch indicator position
       if (touchIndicator) {
         touchIndicator.style.left = touch.clientX + 'px';
         touchIndicator.style.top = touch.clientY + 'px';
@@ -693,6 +648,7 @@
           if (touchIndicator) {
             touchIndicator.classList.remove('visible');
           }
+          // NO mouse up/click here — look zone is LOOK ONLY
           break;
         }
       }
@@ -706,11 +662,11 @@
       }
     }, { passive: false });
 
-    console.log('[MobileControls] Look zone ready');
+    console.log('[MobileControls] Look zone ready — LOOK ONLY, no fire (sensitivity:', sensitivity + ')');
   }
 
   // ═══════════════════════════════════════════════
-  // KEYBOARD INPUT HELPER (for Unity text fields)
+  // KEYBOARD INPUT HELPER
   // ═══════════════════════════════════════════════
   function setupKeyboardHelper() {
     var toggleBtn = document.getElementById('kb-toggle');
@@ -731,16 +687,13 @@
       }
     }, { passive: false });
 
-    // Forward each character typed to Unity canvas
     input.addEventListener('input', function (e) {
       var val = input.value;
       if (val.length > 0) {
         var lastChar = val.charAt(val.length - 1);
         var canvas = document.getElementById('unity-canvas');
 
-        // keydown
         simulateKey(lastChar, 'keydown', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
-        // keypress (some Unity input systems need this)
         if (canvas) {
           canvas.dispatchEvent(new KeyboardEvent('keypress', {
             key: lastChar,
@@ -751,12 +704,10 @@
             cancelable: true
           }));
         }
-        // keyup
         simulateKey(lastChar, 'keyup', 'Key' + lastChar.toUpperCase(), lastChar.charCodeAt(0));
       }
     });
 
-    // Handle Enter key to submit
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -789,11 +740,9 @@
 
     var evt = new KeyboardEvent(type, eventInit);
 
-    // Dispatch on canvas (primary target for Unity)
     if (canvas) {
       canvas.dispatchEvent(evt);
     }
-    // Also dispatch on document & window (some Unity builds listen here)
     document.dispatchEvent(new KeyboardEvent(type, eventInit));
     window.dispatchEvent(new KeyboardEvent(type, eventInit));
   }

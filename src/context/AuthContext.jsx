@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, logInWithGoogle, logOut } from '../config/firebase';
+import { auth, logInWithGoogle, logOut, getRedirectResult } from '../config/firebase';
 
 const AuthContext = createContext();
 
@@ -11,6 +11,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Handle redirect result (mobile auth flow)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        setUser(result.user);
+      }
+    }).catch((error) => {
+      console.error("Redirect auth error:", error);
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
