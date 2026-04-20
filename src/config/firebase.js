@@ -15,19 +15,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Detect mobile browsers where popups are unreliable
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 export const logInWithGoogle = async () => {
+    // On mobile, skip popup entirely — go straight to redirect (most reliable)
+    if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+    }
+
+    // On desktop, use popup (fast and reliable)
     try {
         const result = await signInWithPopup(auth, googleProvider);
         return result.user;
     } catch (error) {
         console.error("Error signing in with Google:", error.code);
-        // On mobile or specific browsers, fallback to redirect if popup is blocked or explicitly closed
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-            console.log("Popup issue detected, falling back to redirect...");
-            await signInWithRedirect(auth, googleProvider);
-            return null;
-        }
-        throw error;
+        // If popup fails on desktop for any reason, fall back to redirect
+        await signInWithRedirect(auth, googleProvider);
+        return null;
     }
 };
 

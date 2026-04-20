@@ -58,6 +58,9 @@
     setupKeyboardHelper();
     setupLookZone();
     preventDefaultGestures();
+    if (gameType === 'fps') {
+      blockCanvasDirectTouch();
+    }
     console.log('[MobileControls] Init complete');
   }
 
@@ -429,25 +432,36 @@
       multitouch: true
     });
 
-    var keyMap = {
-      up:    { key: 'w', code: 'KeyW', keyCode: 87 },
-      down:  { key: 's', code: 'KeyS', keyCode: 83 },
-      left:  { key: 'a', code: 'KeyA', keyCode: 65 },
-      right: { key: 'd', code: 'KeyD', keyCode: 68 }
-    };
+    // For racing: joystick only does left/right/backward. Forward = GAS button only.
+    var keyMap;
+    if (gameType === 'racing') {
+      keyMap = {
+        down:  { key: 's', code: 'KeyS', keyCode: 83 },
+        left:  { key: 'a', code: 'KeyA', keyCode: 65 },
+        right: { key: 'd', code: 'KeyD', keyCode: 68 }
+      };
+    } else {
+      keyMap = {
+        up:    { key: 'w', code: 'KeyW', keyCode: 87 },
+        down:  { key: 's', code: 'KeyS', keyCode: 83 },
+        left:  { key: 'a', code: 'KeyA', keyCode: 65 },
+        right: { key: 'd', code: 'KeyD', keyCode: 68 }
+      };
+    }
 
     joystick.on('move', function (evt, data) {
       if (!data.direction) return;
 
       var newKeys = {};
-      if (data.direction.y === 'up')    newKeys.up = true;
+      // For racing, skip 'up' — GAS button handles forward
+      if (data.direction.y === 'up' && gameType !== 'racing') newKeys.up = true;
       if (data.direction.y === 'down')  newKeys.down = true;
       if (data.direction.x === 'left')  newKeys.left = true;
       if (data.direction.x === 'right') newKeys.right = true;
 
       // Release keys that are no longer active
       Object.keys(activeKeys).forEach(function (dir) {
-        if (!newKeys[dir] && activeKeys[dir]) {
+        if (!newKeys[dir] && activeKeys[dir] && keyMap[dir]) {
           simulateKey(keyMap[dir].key, 'keyup', keyMap[dir].code, keyMap[dir].keyCode);
           activeKeys[dir] = false;
         }
@@ -455,7 +469,7 @@
 
       // Press new keys
       Object.keys(newKeys).forEach(function (dir) {
-        if (!activeKeys[dir]) {
+        if (!activeKeys[dir] && keyMap[dir]) {
           simulateKey(keyMap[dir].key, 'keydown', keyMap[dir].code, keyMap[dir].keyCode);
           activeKeys[dir] = true;
         }
@@ -464,14 +478,14 @@
 
     joystick.on('end', function () {
       Object.keys(activeKeys).forEach(function (dir) {
-        if (activeKeys[dir]) {
+        if (activeKeys[dir] && keyMap[dir]) {
           simulateKey(keyMap[dir].key, 'keyup', keyMap[dir].code, keyMap[dir].keyCode);
           activeKeys[dir] = false;
         }
       });
     });
 
-    console.log('[MobileControls] Joystick ready — FIXED position, size:', joystickSize + 'px');
+    console.log('[MobileControls] Joystick ready — FIXED position, size:', joystickSize + 'px, gameType:', gameType);
   }
 
   // ═══════════════════════════════════════════════
@@ -555,6 +569,42 @@
     }
 
     console.log('[MobileControls] Action buttons ready — fire only on explicit press');
+  }
+
+  // ═══════════════════════════════════════════════
+  // CANVAS TOUCH INTERCEPTOR — Prevent bare canvas
+  // touches from triggering fire/click in Unity.
+  // Only the fire button should trigger mousedown.
+  // ═══════════════════════════════════════════════
+  function blockCanvasDirectTouch() {
+    // Wait for canvas to exist
+    function attach() {
+      var canvas = document.getElementById('unity-canvas');
+      if (!canvas) {
+        setTimeout(attach, 500);
+        return;
+      }
+
+      // Intercept touchstart on canvas and prevent it from becoming
+      // a mouse click — unless the touch originated from a control element
+      canvas.addEventListener('touchstart', function(e) {
+        var target = e.target;
+        // If the touch is directly on the canvas (not on a control overlay),
+        // prevent the default which would synthesize a mouse click
+        if (target === canvas) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchend', function(e) {
+        if (e.target === canvas) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      console.log('[MobileControls] Canvas touch interceptor active — fire button only');
+    }
+    attach();
   }
 
   // ═══════════════════════════════════════════════
