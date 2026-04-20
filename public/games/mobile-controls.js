@@ -133,17 +133,14 @@
       console.log('[MobileControls] Orientation:', isLandscape ? 'landscape' : 'portrait');
 
       if (isLandscape) {
-        // AUTO-ACTIVATE controls in landscape
-        document.body.classList.add('controls-active');
-        var toggleBtn = document.getElementById('controls-toggle');
-        if (toggleBtn) toggleBtn.classList.add('active');
-
+        // DO NOT auto-activate controls in landscape.
+        // Wait for user to enable them manually via the toggle button.
         setTimeout(function() {
           window.scrollTo(0, 0);
           window.dispatchEvent(new Event('resize'));
         }, 100);
       } else {
-        // Deactivate in portrait
+        // Force deactivate in portrait
         document.body.classList.remove('controls-active');
         var toggleBtn2 = document.getElementById('controls-toggle');
         if (toggleBtn2) toggleBtn2.classList.remove('active');
