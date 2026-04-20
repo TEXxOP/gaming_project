@@ -214,10 +214,6 @@
         '<button class="action-btn btn-fire" data-mouse="left">',
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>',
         '  <span class="btn-label">FIRE</span>',
-        '</button>',
-        '<button class="action-btn btn-aim" data-mouse="right">',
-        '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>',
-        '  <span class="btn-label">AIM</span>',
         '</button>'
       ].join('\n');
     } else {
@@ -231,9 +227,9 @@
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
         '  <span class="btn-label">BRAKE</span>',
         '</button>',
-        '<button class="action-btn btn-boost" data-key=" " data-code="Space" data-keycode="32">',
-        '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
-        '  <span class="btn-label">BOOST</span>',
+        '<button class="action-btn btn-boost" data-key="Enter" data-code="Enter" data-keycode="13">',
+        '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+        '  <span class="btn-label">ITEM</span>',
         '</button>'
       ].join('\n');
     }
@@ -446,6 +442,8 @@
       };
     }
 
+    var shiftPressed = false;
+
     joystick.on('move', function (evt, data) {
       if (!data.direction) return;
 
@@ -455,6 +453,12 @@
       if (data.direction.y === 'down')  newKeys.down = true;
       if (data.direction.x === 'left')  newKeys.left = true;
       if (data.direction.x === 'right') newKeys.right = true;
+
+      // In FPS, simulate Shift (sprint) whenever moving
+      if (gameType === 'fps' && !shiftPressed) {
+        simulateKey('Shift', 'keydown', 'ShiftLeft', 16);
+        shiftPressed = true;
+      }
 
       // Release keys that are no longer active
       Object.keys(activeKeys).forEach(function (dir) {
@@ -480,6 +484,12 @@
           activeKeys[dir] = false;
         }
       });
+      
+      // Release Shift
+      if (gameType === 'fps' && shiftPressed) {
+        simulateKey('Shift', 'keyup', 'ShiftLeft', 16);
+        shiftPressed = false;
+      }
     });
 
     console.log('[MobileControls] Joystick ready — FIXED position, size:', joystickSize + 'px, gameType:', gameType);
