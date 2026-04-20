@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,25 +15,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Detect mobile browsers where popups are unreliable
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
 export const logInWithGoogle = async () => {
-    // On mobile, skip popup entirely — go straight to redirect (most reliable)
-    if (isMobile) {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-    }
-
-    // On desktop, use popup (fast and reliable)
     try {
         const result = await signInWithPopup(auth, googleProvider);
         return result.user;
     } catch (error) {
-        console.error("Error signing in with Google:", error.code);
-        // If popup fails on desktop for any reason, fall back to redirect
-        await signInWithRedirect(auth, googleProvider);
-        return null;
+        if (error.code === 'auth/popup-closed-by-user') {
+            console.log("User closed the popup.");
+        } else {
+            console.error("Error signing in with Google:", error.code);
+            alert("Login failed: Please try again. Ensure popups are allowed.");
+        }
+        throw error;
     }
 };
 
@@ -46,4 +39,4 @@ export const logOut = async () => {
     }
 };
 
-export { auth, getRedirectResult };
+export { auth };
