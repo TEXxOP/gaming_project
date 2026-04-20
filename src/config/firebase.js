@@ -16,23 +16,14 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 export const logInWithGoogle = async () => {
-    // Detect if the user is on a mobile device
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile) {
-        // Mobile browsers often block popups, so use redirect flow directly
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-    }
-
     try {
         const result = await signInWithPopup(auth, googleProvider);
         return result.user;
     } catch (error) {
-        console.error("Error signing in with Google:", error.code, error.message);
-        // Fallback to redirect on popup errors
-        if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-            console.log("Popup failed, falling back to redirect...");
+        console.error("Error signing in with Google:", error.code);
+        // On mobile or specific browsers, fallback to redirect if popup is blocked or explicitly closed
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+            console.log("Popup issue detected, falling back to redirect...");
             await signInWithRedirect(auth, googleProvider);
             return null;
         }
