@@ -6,14 +6,21 @@ const Landing = () => {
   const { logInWithGoogle } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
+    // Initiate login synchronously before React re-renders to bypass strict popup blockers
+    const loginPromise = logInWithGoogle();
+    
     setIsAuthenticating(true);
-    try {
-      await logInWithGoogle();
+
+    loginPromise.then(() => {
       setIsAuthenticating(false);
-    } catch (error) {
+    }).catch((error) => {
       setIsAuthenticating(false);
-    }
+      // Suppress expected cancellations, alert on actual failures
+      if (error && error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/redirect-cancelled-by-user') {
+          alert("Login failed: " + error.message);
+      }
+    });
   };
 
   return (

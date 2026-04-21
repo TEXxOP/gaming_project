@@ -11,10 +11,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Resolve any pending redirect results
-    getRedirectResult(auth).catch((error) => {
-        console.error("Error with redirect sign-in:", error);
-        alert("Authentication setup error. Please try again. " + error.message);
+    // Silently resolve redirect results
+    getRedirectResult(auth).then((result) => {
+      if (result) {
+        console.log("Successfully logged in via redirect.");
+      }
+    }).catch((error) => {
+      // Ignore user-cancelled redirects cleanly
+      if (error.code !== 'auth/redirect-cancelled-by-user') {
+        console.error("Unexpected redirect error:", error);
+      }
     });
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

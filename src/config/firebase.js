@@ -17,25 +17,22 @@ const googleProvider = new GoogleAuthProvider();
 
 export const logInWithGoogle = async () => {
     try {
-        // Environment check: if mobile device, use redirect to avoid popup blockers
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-            await signInWithRedirect(auth, googleProvider);
-            // Function won't return here as page redirects to Google
-            return null;
-        } else {
-            const result = await signInWithPopup(auth, googleProvider);
-            return result.user;
-        }
+        // Try popup first. It is the most seamless if it works.
+        const result = await signInWithPopup(auth, googleProvider);
+        return result.user;
     } catch (error) {
-        if (error.code === 'auth/popup-closed-by-user') {
-            console.log("User closed the popup.");
+        // If the browser aggressively blocks the popup, fall back to redirect.
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+            console.warn("Popup blocked by browser. Falling back to redirect logic.");
+            await signInWithRedirect(auth, googleProvider);
+            return null;
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            console.log("User manually closed the popup.");
+            throw error;
         } else {
-            console.error("Error signing in with Google:", error.code);
-            alert("Login failed: Please try again. Ensure popups are allowed.");
+            console.error("Error signing in with Google:", error);
+            throw error;
         }
-        throw error;
     }
 };
 
