@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Landing.css';
 
 const Landing = () => {
   const { logInWithGoogle } = useAuth();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const handleLogin = async () => {
+    setIsAuthenticating(true);
+    try {
+      await logInWithGoogle();
+      setIsAuthenticating(false);
+    } catch (error) {
+      setIsAuthenticating(false);
+    }
+  };
 
   return (
     <div className="landing-auth-split">
@@ -21,9 +32,15 @@ const Landing = () => {
           <h1 className="login-title">AETHERPLAY</h1>
           <p className="login-sub">Please sign in to access the portal.</p>
           
-          <button className="btn-solid-login" onClick={logInWithGoogle}>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" className="google-icon" />
-            Authenticate with Google
+          <button className="btn-solid-login" onClick={handleLogin} disabled={isAuthenticating}>
+            {isAuthenticating ? (
+              "Authenticating..."
+            ) : (
+              <>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" className="google-icon" />
+                Authenticate with Google
+              </>
+            )}
           </button>
         </div>
       </div>
