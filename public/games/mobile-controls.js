@@ -456,14 +456,17 @@
     var shiftPressed = false;
 
     joystick.on('move', function (evt, data) {
-      if (!data.direction) return;
+      if (!data.vector) return;
 
       var newKeys = {};
-      // For racing, skip 'up' — GAS button handles forward
-      if (data.direction.y === 'up' && gameType !== 'racing') newKeys.up = true;
-      if (data.direction.y === 'down')  newKeys.down = true;
-      if (data.direction.x === 'left')  newKeys.left = true;
-      if (data.direction.x === 'right') newKeys.right = true;
+      var vx = data.vector.x;
+      var vy = data.vector.y;
+
+      // Use vector thresholds for sensitive 8-way directional movement
+      if (vy > 0.25 && gameType !== 'racing') newKeys.up = true;
+      if (vy < -0.25) newKeys.down = true;
+      if (vx < -0.25) newKeys.left = true;
+      if (vx > 0.25) newKeys.right = true;
 
       // In FPS, simulate Shift (sprint) whenever moving
       if (gameType === 'fps' && !shiftPressed) {
@@ -517,6 +520,7 @@
     document.addEventListener('touchcancel', handleBtnRelease, { passive: false });
 
     function handleBtnTouch(e) {
+      e.stopPropagation();
       for (var i = 0; i < e.changedTouches.length; i++) {
         var touch = e.changedTouches[i];
         var btn = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -552,6 +556,7 @@
     }
 
     function handleBtnRelease(e) {
+      e.stopPropagation();
       for (var i = 0; i < e.changedTouches.length; i++) {
         var touch = e.changedTouches[i];
         var btn = activeTouches.get(touch.identifier);
@@ -611,12 +616,14 @@
         // prevent the default which would synthesize a mouse click
         if (target === canvas) {
           e.preventDefault();
+          e.stopPropagation();
         }
       }, { passive: false });
 
       canvas.addEventListener('touchend', function(e) {
         if (e.target === canvas) {
           e.preventDefault();
+          e.stopPropagation();
         }
       }, { passive: false });
 
@@ -648,6 +655,7 @@
 
     lookZone.addEventListener('touchstart', function (e) {
       e.preventDefault();
+      e.stopPropagation();
       var touch = e.changedTouches[0];
       activeTouchId = touch.identifier;
       lastTouch = { x: touch.clientX, y: touch.clientY };
@@ -664,6 +672,7 @@
 
     lookZone.addEventListener('touchmove', function (e) {
       e.preventDefault();
+      e.stopPropagation();
       if (activeTouchId === null || !lastTouch) return;
 
       // Throttle to 60fps
@@ -709,6 +718,7 @@
 
     lookZone.addEventListener('touchend', function (e) {
       e.preventDefault();
+      e.stopPropagation();
       for (var i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
           activeTouchId = null;
