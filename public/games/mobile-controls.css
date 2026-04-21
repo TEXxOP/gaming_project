@@ -140,6 +140,7 @@ body.mobile-device #controls-toggle {
 html, body {
   width: 100% !important;
   height: 100% !important;
+  height: 100dvh !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
@@ -435,6 +436,22 @@ body.mobile-device.controls-active #mobile-controls-layer {
   transform: scale(0.88);
   background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.35);
+}
+
+#action-buttons-secondary .action-btn.btn-boost {
+  border-color: rgba(139, 92, 246, 0.35);
+  background: radial-gradient(circle at 40% 35%, rgba(139, 92, 246, 0.18), rgba(139, 92, 246, 0.05));
+  color: rgba(200, 180, 255, 0.95);
+  width: 52px;
+  height: 52px;
+  font-size: 10px;
+}
+
+#action-buttons-secondary .action-btn.btn-boost:active,
+#action-buttons-secondary .action-btn.btn-boost.pressed {
+  background: radial-gradient(circle at 40% 35%, rgba(139, 92, 246, 0.45), rgba(139, 92, 246, 0.15)) !important;
+  border-color: rgba(139, 92, 246, 0.7) !important;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.3) !important;
 }
 
 /* ──────────────────────────────────────────────────

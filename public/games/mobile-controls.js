@@ -88,7 +88,7 @@
     document.body.style.overscrollBehavior = 'none';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
-    document.body.style.height = '100%';
+    document.body.style.height = window.innerHeight ? window.innerHeight + 'px' : '100vh';
     document.body.style.overflow = 'hidden';
 
     console.log('[MobileControls] Viewport meta set');
@@ -158,6 +158,13 @@
 
     // Initial check
     onOrientationChange();
+
+    // Fix height dynamically to prevent buttons going down off-screen
+    function updateHeight() {
+      document.body.style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('resize', updateHeight);
+    
     console.log('[MobileControls] Orientation handler ready (auto-activate)');
   }
 
@@ -226,19 +233,16 @@
         '<button class="action-btn btn-brake" data-key="s" data-code="KeyS" data-keycode="83">',
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
         '  <span class="btn-label">BRAKE</span>',
-        '</button>',
-        '<button class="action-btn btn-boost" data-key="Enter" data-code="Enter" data-keycode="13">',
-        '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-        '  <span class="btn-label">ITEM</span>',
         '</button>'
       ].join('\n');
     }
     controlsLayer.appendChild(actionBtns);
 
-    // Secondary buttons (FPS only)
+    // Secondary buttons
+    var secBtns = document.createElement('div');
+    secBtns.id = 'action-buttons-secondary';
+    
     if (gameType === 'fps') {
-      var secBtns = document.createElement('div');
-      secBtns.id = 'action-buttons-secondary';
       secBtns.innerHTML = [
         '<button class="action-btn" data-key="r" data-code="KeyR" data-keycode="82">',
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
@@ -247,8 +251,15 @@
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
         '</button>'
       ].join('\n');
-      controlsLayer.appendChild(secBtns);
+    } else {
+      secBtns.innerHTML = [
+        '<button class="action-btn btn-boost" data-key="Shift" data-code="ShiftLeft" data-keycode="16">',
+        '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+        '  <span class="btn-label">ITEM</span>',
+        '</button>'
+      ].join('\n');
     }
+    controlsLayer.appendChild(secBtns);
 
     document.body.appendChild(controlsLayer);
 
