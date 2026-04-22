@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,35 +11,44 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-console.log("🔧 Initializing Firebase with config:", {
+console.log("🔧 Firebase Config:", {
   authDomain: firebaseConfig.authDomain,
   projectId: firebaseConfig.projectId
 });
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// CRITICAL: Set persistence to LOCAL immediately
+// This ensures auth state survives page refreshes and browser restarts
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("✅ Auth persistence set to LOCAL");
+  })
+  .catch((error) => {
+    console.error("❌ Failed to set persistence:", error);
+  });
+
+// Configure Google provider
 const googleProvider = new GoogleAuthProvider();
+// Remove prompt: 'select_account' to allow persistence to work properly
 googleProvider.setCustomParameters({
-  prompt: 'select_account'
+  // Only prompt if needed, don't force account selection every time
+  prompt: 'consent'
 });
 
 export const logInWithGoogle = async () => {
     try {
-        console.log("🔐 Attempting popup login...");
+        console.log("🔐 Starting Google login...");
         const result = await signInWithPopup(auth, googleProvider);
-        console.log("✅ Popup login successful!");
-        console.log("   User:", result.user.email);
+        console.log("✅ Login successful!");
+        console.log("   Email:", result.user.email);
         console.log("   UID:", result.user.uid);
-        console.log("   Display Name:", result.user.displayName);
-        
-        // Force a small delay to ensure Firebase processes the auth state
-        await new Promise(resolve => setTimeout(resolve, 100));
         
         return result.user;
     } catch (error) {
         console.error("❌ Login error:", error.code);
-        console.error("   Message:", error.message);
         
         // Popup blocked - use redirect
         if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
