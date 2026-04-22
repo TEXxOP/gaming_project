@@ -622,9 +622,8 @@
   // ═══════════════════════════════════════════════
   // LOOK / AIM ZONE
   // Captures touches on the look zone overlay and dispatches
-  // synthetic touchmove events on the canvas. Since our wrapper
-  // blocks touchstart/touchend (fire triggers) but allows
-  // touchmove through, Unity processes these for camera movement.
+  // ONLY mousemove events for camera aiming.
+  // NO mousedown/mouseup - fire ONLY happens via fire button.
   // ═══════════════════════════════════════════════
   function setupLookZone() {
     if (gameType !== 'fps') return;
@@ -637,18 +636,11 @@
     var lastTouch = null;
     var sensitivity = parseFloat(localStorage.getItem('mc_sensitivity')) || 2.5;
 
-    // We need to send a single touchstart to Unity so it starts tracking,
-    // then send touchmove for camera movement.
-    // The wrapper blocks touchstart when controls are active, so we
-    // use a different approach: dispatch mousemove events via the
-    // ORIGINAL addEventListener (which bypasses our wrapper).
-    //
-    // Actually, Unity's mousemove handler IS allowed through our wrapper.
-    // So we dispatch mousemove with movementX/movementY.
-
     lookZone.addEventListener('touchstart', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      
+      // CRITICAL: Do NOT dispatch mousedown - only track for aiming
       var touch = e.changedTouches[0];
       activeTouchId = touch.identifier;
       lastTouch = { x: touch.clientX, y: touch.clientY };
@@ -658,6 +650,8 @@
         touchIndicator.style.top = touch.clientY + 'px';
         touchIndicator.classList.add('visible');
       }
+      
+      console.log('[MobileControls] Look zone touch started - aiming only, NO fire');
     }, { passive: false });
 
     lookZone.addEventListener('touchmove', function(e) {
@@ -677,20 +671,23 @@
       var dx = (touch.clientX - lastTouch.x) * sensitivity;
       var dy = (touch.clientY - lastTouch.y) * sensitivity;
 
-      // Dispatch mousemove to canvas — our wrapper allows mousemove through
+      // Dispatch ONLY mousemove for camera aiming - NO mousedown/mouseup
       var canvas = document.getElementById('unity-canvas');
       if (canvas) {
         var rect = canvas.getBoundingClientRect();
         var centerX = rect.left + rect.width / 2;
         var centerY = rect.top + rect.height / 2;
 
+        // ONLY mousemove - this moves the camera without firing
         canvas.dispatchEvent(new MouseEvent('mousemove', {
           clientX: centerX + dx,
           clientY: centerY + dy,
           movementX: dx,
           movementY: dy,
           bubbles: true,
-          cancelable: true
+          cancelable: true,
+          // CRITICAL: buttons = 0 means NO mouse buttons pressed
+          buttons: 0
         }));
       }
 
@@ -705,6 +702,8 @@
     lookZone.addEventListener('touchend', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      
+      // CRITICAL: Do NOT dispatch mouseup - only clear tracking
       for (var i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
           activeTouchId = null;
@@ -712,6 +711,7 @@
           if (touchIndicator) {
             touchIndicator.classList.remove('visible');
           }
+          console.log('[MobileControls] Look zone touch ended - NO mouseup sent');
           break;
         }
       }
@@ -725,7 +725,7 @@
       }
     }, { passive: false });
 
-    console.log('[MobileControls] Look zone ready — dispatches mousemove for aiming');
+    console.log('[MobileControls] Look zone ready — ONLY mousemove for aiming, NO fire on touch');
   }
 
   // ═══════════════════════════════════════════════
