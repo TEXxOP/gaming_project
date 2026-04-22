@@ -427,7 +427,7 @@
     var joystick = nipplejs.create({
       zone: zone,
       mode: 'static',                    // ← FIXED, not dynamic
-      position: { left: '80px', bottom: '80px' },  // ← Fixed bottom-left
+      position: { left: '90px', bottom: '100px' },  // ← Moved up slightly to match buttons
       color: 'rgba(255, 255, 255, 0.2)',
       size: joystickSize,
       fadeTime: 0,                        // No fade — always visible
@@ -454,6 +454,18 @@
     }
 
     var shiftPressed = false;
+    var isAutoSprintLocked = false;
+
+    joystick.on('start', function() {
+      // Touching the joystick cancels auto-sprint
+      if (isAutoSprintLocked) {
+        isAutoSprintLocked = false;
+        simulateKey('w', 'keyup', 'KeyW', 87);
+        simulateKey('Shift', 'keyup', 'ShiftLeft', 16);
+        activeKeys['up'] = false;
+        shiftPressed = false;
+      }
+    });
 
     joystick.on('move', function (evt, data) {
       if (!data.vector) return;
@@ -467,6 +479,13 @@
       if (vy < -0.25) newKeys.down = true;
       if (vx < -0.25) newKeys.left = true;
       if (vx > 0.25) newKeys.right = true;
+      
+      // Auto-sprint lock: if pushed far up in FPS
+      if (gameType === 'fps' && vy > 0.85) {
+        isAutoSprintLocked = true;
+      } else if (vy < 0.5) {
+        isAutoSprintLocked = false;
+      }
 
       // In FPS, simulate Shift (sprint) whenever moving
       if (gameType === 'fps' && !shiftPressed) {
@@ -477,6 +496,9 @@
       // Release keys that are no longer active
       Object.keys(activeKeys).forEach(function (dir) {
         if (!newKeys[dir] && activeKeys[dir] && keyMap[dir]) {
+          // If auto-sprint is locked, DO NOT release 'up'
+          if (dir === 'up' && isAutoSprintLocked) return;
+          
           simulateKey(keyMap[dir].key, 'keyup', keyMap[dir].code, keyMap[dir].keyCode);
           activeKeys[dir] = false;
         }
@@ -494,13 +516,16 @@
     joystick.on('end', function () {
       Object.keys(activeKeys).forEach(function (dir) {
         if (activeKeys[dir] && keyMap[dir]) {
+          // If auto-sprint is locked, DO NOT release 'up'
+          if (dir === 'up' && isAutoSprintLocked) return;
+          
           simulateKey(keyMap[dir].key, 'keyup', keyMap[dir].code, keyMap[dir].keyCode);
           activeKeys[dir] = false;
         }
       });
       
-      // Release Shift
-      if (gameType === 'fps' && shiftPressed) {
+      // Release Shift (unless auto-sprint is locked)
+      if (gameType === 'fps' && shiftPressed && !isAutoSprintLocked) {
         simulateKey('Shift', 'keyup', 'ShiftLeft', 16);
         shiftPressed = false;
       }

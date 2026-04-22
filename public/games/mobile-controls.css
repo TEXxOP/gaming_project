@@ -233,11 +233,11 @@ body.mobile-device.controls-active #mobile-controls-layer {
    ────────────────────────────────────────────────── */
 #action-buttons {
   position: absolute;
-  right: calc(16px + env(safe-area-inset-right, 0px));
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   pointer-events: auto;
 }
@@ -307,18 +307,18 @@ body.mobile-device.controls-active #mobile-controls-layer {
 
 /* Icon container */
 .action-btn .btn-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   margin-bottom: 2px;
   opacity: 0.9;
 }
 
 .action-btn .btn-label {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.1em;
   opacity: 0.7;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* ─── Pressed state ─── */
@@ -330,13 +330,18 @@ body.mobile-device.controls-active #mobile-controls-layer {
 
 /* ─── Primary action (Jump / Gas) — Accent color ─── */
 .action-btn.btn-primary-action {
-  width: 68px;
-  height: 68px;
-  font-size: 11px;
+  width: 80px;
+  height: 80px;
+  font-size: 12px;
   border-color: rgba(0, 180, 220, 0.4);
   background: radial-gradient(circle at 40% 35%, rgba(0, 180, 220, 0.22), rgba(0, 180, 220, 0.06));
   color: rgba(180, 240, 255, 0.95);
   box-shadow: 0 4px 20px rgba(0, 180, 220, 0.15), inset 0 1px 0 rgba(0, 180, 220, 0.1);
+}
+
+.action-btn.btn-primary-action .btn-icon {
+  width: 28px;
+  height: 28px;
 }
 
 .action-btn.btn-primary-action::before {
@@ -352,10 +357,17 @@ body.mobile-device.controls-active #mobile-controls-layer {
 
 /* ─── Fire button — Red accent ─── */
 .action-btn.btn-fire {
+  width: 74px;
+  height: 74px;
   border-color: rgba(239, 68, 68, 0.35);
   background: radial-gradient(circle at 40% 35%, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
   color: rgba(255, 180, 180, 0.95);
   box-shadow: 0 4px 20px rgba(239, 68, 68, 0.12), inset 0 1px 0 rgba(239, 68, 68, 0.08);
+}
+
+.action-btn.btn-fire .btn-icon {
+  width: 26px;
+  height: 26px;
 }
 
 .action-btn.btn-fire::before {
@@ -419,17 +431,17 @@ body.mobile-device.controls-active #mobile-controls-layer {
 /* ─── Secondary buttons row ─── */
 #action-buttons-secondary {
   position: absolute;
-  right: calc(84px + env(safe-area-inset-right, 0px));
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  right: calc(108px + env(safe-area-inset-right, 0px));
+  bottom: calc(50px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   pointer-events: auto;
 }
 
 #action-buttons-secondary .action-btn {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   font-size: 9px;
   border-color: rgba(255, 255, 255, 0.1);
   background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
@@ -447,7 +459,7 @@ body.mobile-device.controls-active #mobile-controls-layer {
   border-color: rgba(139, 92, 246, 0.35);
   background: radial-gradient(circle at 40% 35%, rgba(139, 92, 246, 0.18), rgba(139, 92, 246, 0.05));
   color: rgba(200, 180, 255, 0.95);
-  width: 52px;
+  width: 54px;
   height: 52px;
   font-size: 10px;
 }
