@@ -6,6 +6,22 @@ import './Sidebar.css';
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logInWithGoogle, logOut } = useAuth();
 
+  const handleLogin = async () => {
+    try {
+      await logInWithGoogle();
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <nav className="sidebar-nav">
@@ -17,12 +33,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="nav-divider"></div>
         
         {user ? (
-          <div className="nav-item user-active" onClick={logOut} style={{cursor: 'pointer'}}>
+          <div className="nav-item user-active" onClick={handleLogout} style={{cursor: 'pointer'}}>
              <span className="nav-icon">👤</span>
              LOGOUT ({user.displayName?.split(' ')[0]})
           </div>
         ) : (
-          <div className="nav-item" onClick={logInWithGoogle} style={{cursor: 'pointer'}}>
+          <div className="nav-item" onClick={handleLogin} style={{cursor: 'pointer'}}>
             <span className="nav-icon">👤</span>
             LOGIN
           </div>

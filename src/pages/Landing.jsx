@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import googleLogo from '../assets/google-logo.svg';
 import './Landing.css';
 
 const Landing = () => {
   const { logInWithGoogle } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const handleLogin = () => {
-    // Initiate login synchronously before React re-renders to bypass strict popup blockers
-    const loginPromise = logInWithGoogle();
-    
+  const handleLogin = async () => {
     setIsAuthenticating(true);
-
-    loginPromise.then(() => {
-      setIsAuthenticating(false);
-    }).catch((error) => {
-      setIsAuthenticating(false);
-      // Suppress expected cancellations, alert on actual failures
+    
+    try {
+      await logInWithGoogle();
+    } catch (error) {
+      console.error("Login error:", error);
+      // Only show alert for real errors, not user cancellations
       if (error && error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/redirect-cancelled-by-user') {
-          alert("Login failed: " + error.message);
+        alert("Login failed: " + error.message);
       }
-    });
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   return (
@@ -44,7 +44,7 @@ const Landing = () => {
               "Authenticating..."
             ) : (
               <>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" className="google-icon" />
+                <img src={googleLogo} alt="Google" className="google-icon" />
                 Authenticate with Google
               </>
             )}
