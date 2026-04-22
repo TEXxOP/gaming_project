@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,67 +11,62 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+console.log("🔧 Initializing Firebase with config:", {
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId
+});
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
-// Set persistence immediately
-setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Track if we're currently in a login attempt to prevent double-clicks
-let isLoggingIn = false;
-
 export const logInWithGoogle = async () => {
-    // Prevent multiple simultaneous login attempts
-    if (isLoggingIn) {
-        console.log("⏳ Login already in progress...");
-        return null;
-    }
-
-    isLoggingIn = true;
-
     try {
-        console.log("🔐 Starting login with popup...");
+        console.log("🔐 Attempting popup login...");
         const result = await signInWithPopup(auth, googleProvider);
-        console.log("✅ Popup login successful:", result.user.email);
-        isLoggingIn = false;
+        console.log("✅ Popup login successful!");
+        console.log("   User:", result.user.email);
+        console.log("   UID:", result.user.uid);
+        console.log("   Display Name:", result.user.displayName);
+        
+        // Force a small delay to ensure Firebase processes the auth state
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         return result.user;
     } catch (error) {
-        console.error("❌ Login error:", error.code, error.message);
+        console.error("❌ Login error:", error.code);
+        console.error("   Message:", error.message);
         
         // Popup blocked - use redirect
         if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-            console.warn("🔄 Popup blocked, redirecting...");
-            try {
-                await signInWithRedirect(auth, googleProvider);
-                // Don't reset isLoggingIn here - redirect will reload the page
-                return null;
-            } catch (redirectError) {
-                console.error("❌ Redirect failed:", redirectError);
-                isLoggingIn = false;
-                throw redirectError;
-            }
+            console.warn("🔄 Popup blocked, using redirect...");
+            await signInWithRedirect(auth, googleProvider);
+            return null;
         } 
         // User closed popup
         else if (error.code === 'auth/popup-closed-by-user') {
             console.log("👋 User closed popup");
-            isLoggingIn = false;
             return null;
         }
         // Account exists with different credential
         else if (error.code === 'auth/account-exists-with-different-credential') {
             console.error("⚠️ Account exists with different credential");
-            isLoggingIn = false;
-            alert("This email is already associated with a different sign-in method. Please use the original sign-in method.");
+            alert("This email is already associated with a different sign-in method.");
+            return null;
+        }
+        // Network errors
+        else if (error.code === 'auth/network-request-failed') {
+            console.error("🌐 Network error");
+            alert("Network error. Please check your connection and try again.");
             return null;
         }
         // Other errors
         else {
-            isLoggingIn = false;
+            console.error("💥 Unexpected error:", error);
             throw error;
         }
     }

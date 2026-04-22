@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, getRedirectResult, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
 import { auth, logInWithGoogle, logOut } from '../config/firebase';
 
 const AuthContext = createContext();
@@ -9,38 +9,61 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   useEffect(() => {
-    // Set persistence to LOCAL to ensure auth state survives page refreshes
-    setPersistence(auth, browserLocalPersistence).catch((error) => {
-      console.error("Error setting persistence:", error);
-    });
+    console.log("🚀 AuthProvider mounting...");
 
-    // Handle any pending redirect result
+    // Handle redirect result first
     getRedirectResult(auth)
       .then((result) => {
         if (result) {
-          console.log("✅ Redirect login successful:", result.user.email);
+          console.log("✅ Redirect result found:", result.user.email);
+        } else {
+          console.log("ℹ️ No redirect result");
         }
       })
       .catch((error) => {
         if (error.code !== 'auth/redirect-cancelled-by-user') {
-          console.error("❌ Redirect error:", error.code, error.message);
+          console.error("❌ Redirect error:", error.code);
         }
+      })
+      .finally(() => {
+        setInitialCheckDone(true);
       });
 
-    // Listen to auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("🔄 Auth state changed:", currentUser ? `✅ ${currentUser.email}` : "❌ No user");
-      setUser(currentUser);
-      setLoading(false);
-    }, (error) => {
-      console.error("❌ Auth state error:", error);
-      setLoading(false);
-    });
+    // Set up auth state listener
+    const unsubscribe = onAuthStateChanged(
+      auth, 
+      (currentUser) => {
+        console.log("🔄 onAuthStateChanged fired");
+        console.log("   User:", currentUser ? currentUser.email : "null");
+        console.log("   Timestamp:", new Date().toISOString());
+        
+        setUser(currentUser);
+        
+        if (initialCheckDone) {
+          setLoading(false);
+        }
+      },
+      (error) => {
+        console.error("❌ onAuthStateChanged error:", error);
+        setLoading(false);
+      }
+    );
 
-    return () => unsubscribe();
-  }, []);
+    // Fallback: if redirect check takes too long, stop loading anyway
+    const timeout = setTimeout(() => {
+      console.log("⏰ Initial auth check timeout, stopping loading");
+      setLoading(false);
+    }, 3000);
+
+    return () => {
+      console.log("🛑 AuthProvider unmounting");
+      clearTimeout(timeout);
+      unsubscribe();
+    };
+  }, [initialCheckDone]);
 
   const value = {
     user,
@@ -48,6 +71,12 @@ export const AuthProvider = ({ children }) => {
     logInWithGoogle,
     logOut,
   };
+
+  if (loading) {
+    console.log("⏳ AuthProvider: Still loading...");
+  } else {
+    console.log("✅ AuthProvider: Ready, user =", user?.email || "null");
+  }
 
   return (
     <AuthContext.Provider value={value}>
