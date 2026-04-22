@@ -599,11 +599,10 @@
   }
 
   // ═══════════════════════════════════════════════
-  // CANVAS TOUCH INTERCEPTOR — Simple approach:
-  // When controls are ON: set pointer-events:none on canvas.
-  //   → No direct touches reach Unity (no accidental fire)
-  //   → dispatchEvent() from look zone & fire button still works
-  // When controls are OFF: pointer-events:auto (menus work)
+  // CANVAS TOUCH CONFIG
+  // The actual mousedown interception is done by the
+  // addEventListener wrapper in index.html (pre-emptive script).
+  // Here we just ensure proper touch-action on canvas.
   // ═══════════════════════════════════════════════
 
   // Global flag: set ONLY by fire button press/release
@@ -616,29 +615,19 @@
         setTimeout(attach, 200);
         return;
       }
-
-      // Watch for controls-active class toggle
-      function updatePointerEvents() {
-        var controlsOn = document.body.classList.contains('controls-active');
-        canvas.style.pointerEvents = controlsOn ? 'none' : 'auto';
-        canvas.style.touchAction = controlsOn ? 'none' : 'manipulation';
-        console.log('[MobileControls] Canvas pointer-events:', controlsOn ? 'BLOCKED' : 'ALLOWED');
-      }
-
-      var observer = new MutationObserver(updatePointerEvents);
-      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-      // Initial state
-      updatePointerEvents();
-
-      console.log('[MobileControls] Canvas touch interceptor ready (pointer-events toggle)');
+      canvas.style.touchAction = 'none';
+      console.log('[MobileControls] Canvas touch-action set to none');
     }
     attach();
   }
 
   // ═══════════════════════════════════════════════
-  // LOOK / AIM ZONE — Mouse move ONLY (no click/fire)
-  // Throttled to 60fps for performance
+  // LOOK / AIM ZONE
+  // Strategy: Make look zone transparent (pointer-events: none)
+  // so touches pass through to the canvas. Unity handles
+  // camera/aiming natively from touch events.
+  // The mousedown that would trigger fire is blocked by the
+  // addEventListener wrapper in index.html.
   // ═══════════════════════════════════════════════
   function setupLookZone() {
     if (gameType !== 'fps') return;
@@ -646,105 +635,14 @@
     var lookZone = document.getElementById('look-zone');
     if (!lookZone) return;
 
+    // Make look zone transparent — touches pass through to canvas
+    lookZone.style.pointerEvents = 'none';
+
+    // Hide the touch indicator since we're not tracking touches here
     var touchIndicator = document.getElementById('look-touch-indicator');
-    var lastTouch = null;
-    var activeTouchId = null;
+    if (touchIndicator) touchIndicator.style.display = 'none';
 
-    // Load sensitivity from localStorage or use default
-    var sensitivity = parseFloat(localStorage.getItem('mc_sensitivity')) || 2.5;
-
-    // Throttle: max 60fps for mouse move events
-    var lastMoveTime = 0;
-    var THROTTLE_MS = 16; // ~60fps
-
-    lookZone.addEventListener('touchstart', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var touch = e.changedTouches[0];
-      activeTouchId = touch.identifier;
-      lastTouch = { x: touch.clientX, y: touch.clientY };
-
-      // Show touch indicator
-      if (touchIndicator) {
-        touchIndicator.style.left = touch.clientX + 'px';
-        touchIndicator.style.top = touch.clientY + 'px';
-        touchIndicator.classList.add('visible');
-      }
-
-      // NO mouse click here — fire ONLY from fire button
-    }, { passive: false });
-
-    lookZone.addEventListener('touchmove', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (activeTouchId === null || !lastTouch) return;
-
-      // Throttle to 60fps
-      var now = performance.now();
-      if (now - lastMoveTime < THROTTLE_MS) return;
-      lastMoveTime = now;
-
-      var touch = null;
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === activeTouchId) {
-          touch = e.changedTouches[i];
-          break;
-        }
-      }
-      if (!touch) return;
-
-      var dx = (touch.clientX - lastTouch.x) * sensitivity;
-      var dy = (touch.clientY - lastTouch.y) * sensitivity;
-
-      var canvas = document.getElementById('unity-canvas');
-      if (canvas) {
-        var rect = canvas.getBoundingClientRect();
-        var centerX = rect.left + rect.width / 2;
-        var centerY = rect.top + rect.height / 2;
-
-        canvas.dispatchEvent(new MouseEvent('mousemove', {
-          clientX: centerX + dx,
-          clientY: centerY + dy,
-          movementX: dx,
-          movementY: dy,
-          bubbles: true,
-          cancelable: true
-        }));
-      }
-
-      if (touchIndicator) {
-        touchIndicator.style.left = touch.clientX + 'px';
-        touchIndicator.style.top = touch.clientY + 'px';
-      }
-
-      lastTouch = { x: touch.clientX, y: touch.clientY };
-    }, { passive: false });
-
-    lookZone.addEventListener('touchend', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === activeTouchId) {
-          activeTouchId = null;
-          lastTouch = null;
-          if (touchIndicator) {
-            touchIndicator.classList.remove('visible');
-          }
-          // NO mouse up/click here — look zone is LOOK ONLY
-          break;
-        }
-      }
-    }, { passive: false });
-
-    lookZone.addEventListener('touchcancel', function () {
-      activeTouchId = null;
-      lastTouch = null;
-      if (touchIndicator) {
-        touchIndicator.classList.remove('visible');
-      }
-    }, { passive: false });
-
-    console.log('[MobileControls] Look zone ready — LOOK ONLY, no fire (sensitivity:', sensitivity + ')');
+    console.log('[MobileControls] Look zone set to pass-through — Unity handles aiming natively');
   }
 
   // ═══════════════════════════════════════════════

@@ -26,9 +26,29 @@
       </div>
     </div>
     <script>
-      // ── FIRE BUTTON FLAG ──
-      // Only the fire button sets this to allow mousedown through.
+      // ── INTERCEPT UNITY'S INPUT HANDLERS ──
+      // Wraps canvas.addEventListener BEFORE Unity loads.
+      // Blocks mousedown/pointerdown (which trigger fire) when controls
+      // are active and fire button is not pressed.
+      // Touch events pass through untouched so Unity handles aiming natively.
       window.__fireButtonActive = false;
+      (function() {
+        var canvas = document.getElementById('unity-canvas');
+        if (!canvas) return;
+        var origAEL = canvas.addEventListener.bind(canvas);
+        canvas.addEventListener = function(type, listener, options) {
+          if (type === 'mousedown' || type === 'pointerdown') {
+            origAEL(type, function(e) {
+              if (document.body.classList.contains('controls-active') && !window.__fireButtonActive) {
+                return; // silently drop — no fire
+              }
+              listener.call(canvas, e);
+            }, options);
+          } else {
+            origAEL(type, listener, options);
+          }
+        };
+      })();
     </script>
     <script>
 
