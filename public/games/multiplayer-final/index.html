@@ -26,44 +26,9 @@
       </div>
     </div>
     <script>
-      // ── PRE-EMPTIVE TOUCH BLOCKER ──
-      // Only blocks touch-to-fire when mobile controls are ACTIVE.
-      // When controls are OFF (menus, lobby), all touches pass through normally.
+      // ── FIRE BUTTON FLAG ──
+      // Only the fire button sets this to allow mousedown through.
       window.__fireButtonActive = false;
-      (function() {
-        var canvas = document.getElementById('unity-canvas');
-        if (!canvas) return;
-        function controlsOn() {
-          return document.body.classList.contains('controls-active');
-        }
-        // Block touch events on canvas ONLY when controls are active
-        ['touchstart','touchend','touchmove','touchcancel'].forEach(function(evt) {
-          canvas.addEventListener(evt, function(e) {
-            if (controlsOn()) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-            }
-          }, { passive: false, capture: true });
-        });
-        // Block pointer events from touch ONLY when controls active
-        ['pointerdown','pointerup','pointermove'].forEach(function(evt) {
-          canvas.addEventListener(evt, function(e) {
-            if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-            }
-          }, { passive: false, capture: true });
-        });
-        // Block mouse events ONLY when controls active and fire button not pressed
-        ['mousedown','mouseup','click'].forEach(function(evt) {
-          canvas.addEventListener(evt, function(e) {
-            if (controlsOn() && !window.__fireButtonActive) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-            }
-          }, { passive: false, capture: true });
-        });
-      })();
     </script>
     <script>
 

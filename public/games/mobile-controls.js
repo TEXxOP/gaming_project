@@ -599,14 +599,11 @@
   }
 
   // ═══════════════════════════════════════════════
-  // CANVAS TOUCH INTERCEPTOR — Blocks touch-to-fire
-  // ONLY when mobile controls are toggled ON.
-  // When controls are OFF (menus, lobby, Create Room),
-  // all touches pass through to Unity normally.
-  //
-  // Unity's emscripten framework converts touch/pointer
-  // events into synthetic mouse events internally.
-  // We block this ONLY during gameplay (controls active).
+  // CANVAS TOUCH INTERCEPTOR — Simple approach:
+  // When controls are ON: set pointer-events:none on canvas.
+  //   → No direct touches reach Unity (no accidental fire)
+  //   → dispatchEvent() from look zone & fire button still works
+  // When controls are OFF: pointer-events:auto (menus work)
   // ═══════════════════════════════════════════════
 
   // Global flag: set ONLY by fire button press/release
@@ -620,74 +617,21 @@
         return;
       }
 
-      // Helper: check if controls are toggled ON
-      function controlsOn() {
-        return document.body.classList.contains('controls-active');
+      // Watch for controls-active class toggle
+      function updatePointerEvents() {
+        var controlsOn = document.body.classList.contains('controls-active');
+        canvas.style.pointerEvents = controlsOn ? 'none' : 'auto';
+        canvas.style.touchAction = controlsOn ? 'none' : 'manipulation';
+        console.log('[MobileControls] Canvas pointer-events:', controlsOn ? 'BLOCKED' : 'ALLOWED');
       }
 
-      // ── 1. Strip touch-action when controls active ──
-      // Use MutationObserver to toggle touch-action dynamically
-      var observer = new MutationObserver(function() {
-        canvas.style.touchAction = controlsOn() ? 'none' : 'manipulation';
-      });
+      var observer = new MutationObserver(updatePointerEvents);
       observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-      // ── 2. Block touch events on canvas ONLY when controls are active ──
-      canvas.addEventListener('touchstart', function(e) {
-        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
-      }, { passive: false, capture: true });
+      // Initial state
+      updatePointerEvents();
 
-      canvas.addEventListener('touchend', function(e) {
-        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('touchmove', function(e) {
-        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('touchcancel', function(e) {
-        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
-      }, { passive: false, capture: true });
-
-      // ── 3. Block pointer events ONLY when controls active ──
-      canvas.addEventListener('pointerdown', function(e) {
-        if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
-          e.preventDefault(); e.stopImmediatePropagation();
-        }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('pointerup', function(e) {
-        if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
-          e.preventDefault(); e.stopImmediatePropagation();
-        }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('pointermove', function(e) {
-        if (controlsOn() && e.pointerType === 'touch') {
-          e.preventDefault(); e.stopImmediatePropagation();
-        }
-      }, { passive: false, capture: true });
-
-      // ── 4. Block mouse events ONLY when controls active ──
-      canvas.addEventListener('mousedown', function(e) {
-        if (controlsOn() && !window.__fireButtonActive) {
-          e.preventDefault(); e.stopImmediatePropagation(); return false;
-        }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('mouseup', function(e) {
-        if (controlsOn() && !window.__fireButtonActive) {
-          e.preventDefault(); e.stopImmediatePropagation(); return false;
-        }
-      }, { passive: false, capture: true });
-
-      canvas.addEventListener('click', function(e) {
-        if (controlsOn() && !window.__fireButtonActive) {
-          e.preventDefault(); e.stopImmediatePropagation(); return false;
-        }
-      }, { passive: false, capture: true });
-
-      console.log('[MobileControls] Canvas touch interceptor — blocks fire ONLY when controls active');
+      console.log('[MobileControls] Canvas touch interceptor ready (pointer-events toggle)');
     }
     attach();
   }
