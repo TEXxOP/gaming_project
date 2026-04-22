@@ -623,11 +623,10 @@
 
   // ═══════════════════════════════════════════════
   // LOOK / AIM ZONE
-  // Strategy: Make look zone transparent (pointer-events: none)
-  // so touches pass through to the canvas. Unity handles
-  // camera/aiming natively from touch events.
-  // The mousedown that would trigger fire is blocked by the
-  // addEventListener wrapper in index.html.
+  // Captures touches on the look zone overlay and dispatches
+  // synthetic touchmove events on the canvas. Since our wrapper
+  // blocks touchstart/touchend (fire triggers) but allows
+  // touchmove through, Unity processes these for camera movement.
   // ═══════════════════════════════════════════════
   function setupLookZone() {
     if (gameType !== 'fps') return;
@@ -635,14 +634,100 @@
     var lookZone = document.getElementById('look-zone');
     if (!lookZone) return;
 
-    // Make look zone transparent — touches pass through to canvas
-    lookZone.style.pointerEvents = 'none';
-
-    // Hide the touch indicator since we're not tracking touches here
     var touchIndicator = document.getElementById('look-touch-indicator');
-    if (touchIndicator) touchIndicator.style.display = 'none';
+    var activeTouchId = null;
+    var lastTouch = null;
+    var sensitivity = parseFloat(localStorage.getItem('mc_sensitivity')) || 2.5;
 
-    console.log('[MobileControls] Look zone set to pass-through — Unity handles aiming natively');
+    // We need to send a single touchstart to Unity so it starts tracking,
+    // then send touchmove for camera movement.
+    // The wrapper blocks touchstart when controls are active, so we
+    // use a different approach: dispatch mousemove events via the
+    // ORIGINAL addEventListener (which bypasses our wrapper).
+    //
+    // Actually, Unity's mousemove handler IS allowed through our wrapper.
+    // So we dispatch mousemove with movementX/movementY.
+
+    lookZone.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var touch = e.changedTouches[0];
+      activeTouchId = touch.identifier;
+      lastTouch = { x: touch.clientX, y: touch.clientY };
+
+      if (touchIndicator) {
+        touchIndicator.style.left = touch.clientX + 'px';
+        touchIndicator.style.top = touch.clientY + 'px';
+        touchIndicator.classList.add('visible');
+      }
+    }, { passive: false });
+
+    lookZone.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (activeTouchId === null || !lastTouch) return;
+
+      var touch = null;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === activeTouchId) {
+          touch = e.changedTouches[i];
+          break;
+        }
+      }
+      if (!touch) return;
+
+      var dx = (touch.clientX - lastTouch.x) * sensitivity;
+      var dy = (touch.clientY - lastTouch.y) * sensitivity;
+
+      // Dispatch mousemove to canvas — our wrapper allows mousemove through
+      var canvas = document.getElementById('unity-canvas');
+      if (canvas) {
+        var rect = canvas.getBoundingClientRect();
+        var centerX = rect.left + rect.width / 2;
+        var centerY = rect.top + rect.height / 2;
+
+        canvas.dispatchEvent(new MouseEvent('mousemove', {
+          clientX: centerX + dx,
+          clientY: centerY + dy,
+          movementX: dx,
+          movementY: dy,
+          bubbles: true,
+          cancelable: true
+        }));
+      }
+
+      if (touchIndicator) {
+        touchIndicator.style.left = touch.clientX + 'px';
+        touchIndicator.style.top = touch.clientY + 'px';
+      }
+
+      lastTouch = { x: touch.clientX, y: touch.clientY };
+    }, { passive: false });
+
+    lookZone.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === activeTouchId) {
+          activeTouchId = null;
+          lastTouch = null;
+          if (touchIndicator) {
+            touchIndicator.classList.remove('visible');
+          }
+          break;
+        }
+      }
+    }, { passive: false });
+
+    lookZone.addEventListener('touchcancel', function() {
+      activeTouchId = null;
+      lastTouch = null;
+      if (touchIndicator) {
+        touchIndicator.classList.remove('visible');
+      }
+    }, { passive: false });
+
+    console.log('[MobileControls] Look zone ready — dispatches mousemove for aiming');
   }
 
   // ═══════════════════════════════════════════════
