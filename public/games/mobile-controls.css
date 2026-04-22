@@ -207,8 +207,8 @@ body.mobile-device.controls-active #mobile-controls-layer {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 40%;
-  height: 70%;
+  width: 30%;
+  height: 50%;
   pointer-events: auto;
   touch-action: none;
 }
@@ -229,7 +229,7 @@ body.mobile-device.controls-active #mobile-controls-layer {
 }
 
 /* ──────────────────────────────────────────────────
-   ACTION BUTTONS (Right Side) — Premium Circular
+   ACTION BUTTONS (Right Side & Top Left)
    ────────────────────────────────────────────────── */
 #action-buttons {
   position: absolute;
@@ -239,6 +239,14 @@ body.mobile-device.controls-active #mobile-controls-layer {
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  pointer-events: auto;
+}
+
+#fire-button-zone {
+  position: absolute;
+  left: calc(24px + env(safe-area-inset-left, 0px));
+  top: calc(24px + env(safe-area-inset-top, 0px));
+  display: flex;
   pointer-events: auto;
 }
 

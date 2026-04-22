@@ -217,12 +217,19 @@
         '<button class="action-btn btn-primary-action" data-key=" " data-code="Space" data-keycode="32">',
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="18" x2="12" y2="6"/></svg>',
         '  <span class="btn-label">JUMP</span>',
-        '</button>',
+        '</button>'
+      ].join('\n');
+      
+      // Top-Left Fire Button
+      var fireZone = document.createElement('div');
+      fireZone.id = 'fire-button-zone';
+      fireZone.innerHTML = [
         '<button class="action-btn btn-fire" data-mouse="left">',
         '  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>',
         '  <span class="btn-label">FIRE</span>',
         '</button>'
       ].join('\n');
+      controlsLayer.appendChild(fireZone);
     } else {
       // Racing controls
       actionBtns.innerHTML = [
@@ -455,8 +462,13 @@
 
     var shiftPressed = false;
     var isAutoSprintLocked = false;
+    var autoSprintTimer = null;
 
     joystick.on('start', function() {
+      if (autoSprintTimer) {
+        clearTimeout(autoSprintTimer);
+        autoSprintTimer = null;
+      }
       // Touching the joystick cancels auto-sprint
       if (isAutoSprintLocked) {
         isAutoSprintLocked = false;
@@ -480,11 +492,25 @@
       if (vx < -0.25) newKeys.left = true;
       if (vx > 0.25) newKeys.right = true;
       
-      // Auto-sprint lock: if pushed far up in FPS
-      if (gameType === 'fps' && vy > 0.85) {
-        isAutoSprintLocked = true;
-      } else if (vy < 0.5) {
-        isAutoSprintLocked = false;
+      // Auto-sprint lock logic (Hold to lock, pull down to cancel)
+      if (gameType === 'fps') {
+        if (vy > 0.85) {
+          if (!isAutoSprintLocked && !autoSprintTimer) {
+            autoSprintTimer = setTimeout(function() {
+              isAutoSprintLocked = true;
+            }, 600); // Hold for 600ms
+          }
+        } else {
+          if (autoSprintTimer) {
+            clearTimeout(autoSprintTimer);
+            autoSprintTimer = null;
+          }
+        }
+
+        // Cancel lock if pulled down
+        if (vy < -0.25 && isAutoSprintLocked) {
+          isAutoSprintLocked = false;
+        }
       }
 
       // In FPS, simulate Shift (sprint) whenever moving
@@ -514,6 +540,10 @@
     });
 
     joystick.on('end', function () {
+      if (autoSprintTimer) {
+        clearTimeout(autoSprintTimer);
+        autoSprintTimer = null;
+      }
       Object.keys(activeKeys).forEach(function (dir) {
         if (activeKeys[dir] && keyMap[dir]) {
           // If auto-sprint is locked, DO NOT release 'up'
