@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import googleLogo from '../assets/google-logo.svg';
-import './Landing.css';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import googleLogo from '../assets/google-logo.svg';
 import './Landing.css';
+
 
 const Landing = () => {
   const { user, logInWithGoogle } = useAuth();
