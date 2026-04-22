@@ -1,47 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import googleLogo from '../assets/google-logo.svg';
 import './Landing.css';
 
-
 const Landing = () => {
-  const { user, logInWithGoogle } = useAuth();
-  const navigate = useNavigate();
+  const { logInWithGoogle } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  // Navigate to games when user is authenticated
-  useEffect(() => {
-    if (user) {
-      console.log("✅ User detected, navigating to /games");
-      navigate('/games', { replace: true });
-    }
-  }, [user, navigate]);
-
   const handleLogin = async () => {
-    if (isAuthenticating) {
-      console.log("⏳ Already authenticating, ignoring click");
-      return;
-    }
-
     setIsAuthenticating(true);
-    console.log("🔘 Login button clicked");
-    
     try {
-      const result = await logInWithGoogle();
-      if (result) {
-        console.log("✅ Login completed, user:", result.email);
-        // Don't reset isAuthenticating - let the useEffect handle navigation
-      } else {
-        console.log("⚠️ Login returned null (redirect or cancelled)");
-        setIsAuthenticating(false);
-      }
+      await logInWithGoogle();
     } catch (error) {
-      console.error("❌ Login failed:", error);
+      console.error("Login error:", error);
+    } finally {
       setIsAuthenticating(false);
-      if (error && error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/redirect-cancelled-by-user') {
-        alert("Login failed: " + error.message);
-      }
     }
   };
 

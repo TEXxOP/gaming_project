@@ -11,49 +11,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("🚀 AuthProvider initializing...");
+    // Resolve any pending redirect results
+    getRedirectResult(auth).catch((error) => {
+        console.error("Error with redirect sign-in:", error);
+        alert("Authentication setup error. Please try again. " + error.message);
+    });
 
-    let authUnsubscribe = null;
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
 
-    // Initialize auth
-    const initAuth = async () => {
-      try {
-        // Check for redirect result first
-        const redirectResult = await getRedirectResult(auth);
-        if (redirectResult) {
-          console.log("✅ Redirect login successful:", redirectResult.user.email);
-        }
-      } catch (error) {
-        if (error.code !== 'auth/redirect-cancelled-by-user') {
-          console.error("❌ Redirect error:", error.code);
-        }
-      }
-
-      // Set up auth state listener
-      authUnsubscribe = onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          console.log("🔄 Auth state changed:", currentUser ? currentUser.email : "No user");
-          setUser(currentUser);
-          setLoading(false);
-        },
-        (error) => {
-          console.error("❌ Auth state error:", error);
-          setLoading(false);
-        }
-      );
-    };
-
-    initAuth();
-
-    // Cleanup
-    return () => {
-      console.log("🛑 AuthProvider unmounting");
-      if (authUnsubscribe) {
-        authUnsubscribe();
-      }
-    };
-  }, []); // Empty dependency array - only run once on mount
+    return () => unsubscribe();
+  }, []);
 
   const value = {
     user,
@@ -61,8 +31,6 @@ export const AuthProvider = ({ children }) => {
     logInWithGoogle,
     logOut,
   };
-
-  console.log("📊 AuthProvider render - Loading:", loading, "User:", user?.email || "none");
 
   return (
     <AuthContext.Provider value={value}>
