@@ -28,9 +28,8 @@ console.log('📱 Device:', isMobile ? 'Mobile' : 'Desktop');
 export const logInWithGoogle = async () => {
   try {
     console.log('🪟 Using popup for authentication...');
-    // Always use popup. Redirect causes infinite loops on mobile due to 
-    // cross-site cookie blocking (Safari ITP / Chrome). Popups work on mobile
-    // when triggered by a direct user click.
+    // Always try popup first. It works best on mobile when triggered by a direct user click
+    // and avoids Safari/Chrome cross-site tracking issues.
     const result = await signInWithPopup(auth, googleProvider);
     console.log('✅ Popup login successful:', result.user.email);
     return result.user;
@@ -39,6 +38,14 @@ export const logInWithGoogle = async () => {
       console.log('👋 User closed the popup');
       return null;
     }
+    
+    // FALLBACK: If the browser strictly blocks the popup, fall back to redirect
+    if (error.code === 'auth/popup-blocked') {
+      console.warn('⚠️ Popup was blocked by the browser. Falling back to redirect...');
+      await signInWithRedirect(auth, googleProvider);
+      return null; // Will redirect, won't return
+    }
+
     console.error('❌ Login error:', error);
     throw error;
   }
