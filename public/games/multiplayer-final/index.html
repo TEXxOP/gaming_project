@@ -26,37 +26,9 @@
       </div>
     </div>
     <script>
-      // ── INTERCEPT UNITY'S INPUT HANDLERS ──
-      // Based on framework.js analysis: Unity registers handlers for
-      // touchstart, touchend, touchmove, mousedown, mousemove via addEventListener.
-      // Touch-to-mouse mapping happens inside WASM:
-      //   touchstart → Input.GetMouseButton(0) = true → fires gun
-      //   touchmove  → camera/aiming movement
-      //   mousedown  → also triggers fire (browser synthesizes from touch)
-      //
-      // Strategy: wrap addEventListener BEFORE Unity loads.
-      // Block: touchstart, touchend, mousedown (fire triggers)
-      // Allow: touchmove, mousemove (aiming)
+      // Fire button flag — no event interception here.
+      // Touch blocking is handled by the mobile-controls-layer overlay.
       window.__fireButtonActive = false;
-      (function() {
-        var canvas = document.getElementById('unity-canvas');
-        if (!canvas) return;
-        var origAEL = canvas.addEventListener.bind(canvas);
-        canvas.addEventListener = function(type, listener, options) {
-          if (type === 'touchstart' || type === 'touchend' || type === 'mousedown') {
-            origAEL(type, function(e) {
-              // When controls are active, block unless fire button is pressed
-              if (document.body.classList.contains('controls-active') && !window.__fireButtonActive) {
-                return; // silently drop — prevents fire
-              }
-              listener.call(canvas, e);
-            }, options);
-          } else {
-            // touchmove, mousemove, mouseup, etc. pass through for aiming
-            origAEL(type, listener, options);
-          }
-        };
-      })();
     </script>
     <script>
 

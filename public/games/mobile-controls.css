@@ -192,6 +192,11 @@ body.mobile-device #unity-canvas {
 
 body.mobile-device.controls-active #mobile-controls-layer {
   display: block;
+  /* CRITICAL: pointer-events: auto makes this overlay capture ALL touches.
+     No touch can reach the canvas underneath = no accidental fire.
+     Only the fire button dispatches mousedown to the canvas. */
+  pointer-events: auto;
+  touch-action: none;
   animation: fadeInControls 0.2s ease-out;
 }
 

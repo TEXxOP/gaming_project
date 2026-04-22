@@ -599,14 +599,12 @@
   }
 
   // ═══════════════════════════════════════════════
-  // CANVAS TOUCH CONFIG
-  // The actual mousedown interception is done by the
-  // addEventListener wrapper in index.html (pre-emptive script).
-  // Here we just ensure proper touch-action on canvas.
+  // CANVAS SETUP
+  // Touch blocking is done purely via CSS:
+  // When controls are active, #mobile-controls-layer has
+  // pointer-events: auto, physically capturing ALL touches
+  // before they reach the canvas. No JS event interception needed.
   // ═══════════════════════════════════════════════
-
-  // Global flag: set ONLY by fire button press/release
-  window.__fireButtonActive = false;
 
   function blockCanvasDirectTouch() {
     function attach() {
@@ -616,7 +614,7 @@
         return;
       }
       canvas.style.touchAction = 'none';
-      console.log('[MobileControls] Canvas touch-action set to none');
+      console.log('[MobileControls] Canvas touch-action set to none. Overlay blocks touches when controls active.');
     }
     attach();
   }
