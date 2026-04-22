@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Landing from './pages/Landing';
 import Gallery from './pages/Gallery';
 import GamePage from './pages/GamePage';
+import AuthDebug from './components/AuthDebug';
 import './index.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -36,6 +37,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <AuthDebug />
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>

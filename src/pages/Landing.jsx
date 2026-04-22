@@ -8,18 +8,29 @@ const Landing = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const handleLogin = async () => {
+    if (isAuthenticating) {
+      console.log("Already authenticating, ignoring click");
+      return;
+    }
+
     setIsAuthenticating(true);
+    console.log("🔘 Login button clicked");
     
     try {
-      await logInWithGoogle();
+      const result = await logInWithGoogle();
+      if (result) {
+        console.log("✅ Login completed, user:", result.email);
+      }
     } catch (error) {
-      console.error("Login error:", error);
-      // Only show alert for real errors, not user cancellations
+      console.error("❌ Login failed:", error);
       if (error && error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/redirect-cancelled-by-user') {
         alert("Login failed: " + error.message);
       }
     } finally {
-      setIsAuthenticating(false);
+      // Small delay before re-enabling button to prevent double-clicks
+      setTimeout(() => {
+        setIsAuthenticating(false);
+      }, 1000);
     }
   };
 

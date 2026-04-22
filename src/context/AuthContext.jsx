@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { onAuthStateChanged, getRedirectResult, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { auth, logInWithGoogle, logOut } from '../config/firebase';
 
 const AuthContext = createContext();
@@ -9,42 +9,37 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const redirectHandled = useRef(false);
 
   useEffect(() => {
-    let unsubscribe;
+    // Set persistence to LOCAL to ensure auth state survives page refreshes
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error("Error setting persistence:", error);
+    });
 
-    const initAuth = async () => {
-      // Handle redirect result only once
-      if (!redirectHandled.current) {
-        redirectHandled.current = true;
-        try {
-          const result = await getRedirectResult(auth);
-          if (result) {
-            console.log("Successfully logged in via redirect:", result.user.email);
-          }
-        } catch (error) {
-          if (error.code !== 'auth/redirect-cancelled-by-user') {
-            console.error("Redirect error:", error);
-          }
+    // Handle any pending redirect result
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          console.log("✅ Redirect login successful:", result.user.email);
         }
-      }
-
-      // Set up auth state listener
-      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        console.log("Auth state changed:", currentUser?.email || "No user");
-        setUser(currentUser);
-        setLoading(false);
+      })
+      .catch((error) => {
+        if (error.code !== 'auth/redirect-cancelled-by-user') {
+          console.error("❌ Redirect error:", error.code, error.message);
+        }
       });
-    };
 
-    initAuth();
+    // Listen to auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("🔄 Auth state changed:", currentUser ? `✅ ${currentUser.email}` : "❌ No user");
+      setUser(currentUser);
+      setLoading(false);
+    }, (error) => {
+      console.error("❌ Auth state error:", error);
+      setLoading(false);
+    });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+    return () => unsubscribe();
   }, []);
 
   const value = {
