@@ -27,32 +27,37 @@
     </div>
     <script>
       // ── PRE-EMPTIVE TOUCH BLOCKER ──
-      // Must run BEFORE Unity's framework to intercept touch-to-mouse synthesis.
-      // Fire only triggers via the mobile controls fire button (sets __fireButtonActive).
+      // Only blocks touch-to-fire when mobile controls are ACTIVE.
+      // When controls are OFF (menus, lobby), all touches pass through normally.
       window.__fireButtonActive = false;
       (function() {
         var canvas = document.getElementById('unity-canvas');
         if (!canvas) return;
-        // Block all touch events on canvas at capture phase
+        function controlsOn() {
+          return document.body.classList.contains('controls-active');
+        }
+        // Block touch events on canvas ONLY when controls are active
         ['touchstart','touchend','touchmove','touchcancel'].forEach(function(evt) {
           canvas.addEventListener(evt, function(e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-          }, { passive: false, capture: true });
-        });
-        // Block pointer events from touch
-        ['pointerdown','pointerup','pointermove'].forEach(function(evt) {
-          canvas.addEventListener(evt, function(e) {
-            if (e.pointerType === 'touch' && !window.__fireButtonActive) {
+            if (controlsOn()) {
               e.preventDefault();
               e.stopImmediatePropagation();
             }
           }, { passive: false, capture: true });
         });
-        // Block mouse events unless fire button active
+        // Block pointer events from touch ONLY when controls active
+        ['pointerdown','pointerup','pointermove'].forEach(function(evt) {
+          canvas.addEventListener(evt, function(e) {
+            if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          }, { passive: false, capture: true });
+        });
+        // Block mouse events ONLY when controls active and fire button not pressed
         ['mousedown','mouseup','click'].forEach(function(evt) {
           canvas.addEventListener(evt, function(e) {
-            if (!window.__fireButtonActive) {
+            if (controlsOn() && !window.__fireButtonActive) {
               e.preventDefault();
               e.stopImmediatePropagation();
             }

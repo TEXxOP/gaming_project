@@ -599,16 +599,14 @@
   }
 
   // ═══════════════════════════════════════════════
-  // CANVAS TOUCH INTERCEPTOR — Aggressive block of
-  // Unity's internal touch-to-mouse synthesis.
-  // Only the fire button should trigger mousedown.
+  // CANVAS TOUCH INTERCEPTOR — Blocks touch-to-fire
+  // ONLY when mobile controls are toggled ON.
+  // When controls are OFF (menus, lobby, Create Room),
+  // all touches pass through to Unity normally.
   //
   // Unity's emscripten framework converts touch/pointer
   // events into synthetic mouse events internally.
-  // Simple preventDefault is NOT enough. We must:
-  // 1. Block synthetic mousedown/click on canvas
-  // 2. Wrap Unity's own touch/pointer handlers
-  // 3. Only allow fire via our explicit flag
+  // We block this ONLY during gameplay (controls active).
   // ═══════════════════════════════════════════════
 
   // Global flag: set ONLY by fire button press/release
@@ -622,85 +620,74 @@
         return;
       }
 
-      // ── 1. Strip touch-action from canvas (Unity sets "manipulation") ──
-      canvas.style.touchAction = 'none';
+      // Helper: check if controls are toggled ON
+      function controlsOn() {
+        return document.body.classList.contains('controls-active');
+      }
 
-      // ── 2. Block ALL touch events on canvas at the highest priority ──
-      // This runs before Unity's own handlers because we register first
-      // with { capture: true }
+      // ── 1. Strip touch-action when controls active ──
+      // Use MutationObserver to toggle touch-action dynamically
+      var observer = new MutationObserver(function() {
+        canvas.style.touchAction = controlsOn() ? 'none' : 'manipulation';
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+      // ── 2. Block touch events on canvas ONLY when controls are active ──
       canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('touchmove', function(e) {
-        // Allow touchmove only if look-zone is handling it
-        // Canvas direct touchmove is blocked
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('touchcancel', function(e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        if (controlsOn()) { e.preventDefault(); e.stopImmediatePropagation(); }
       }, { passive: false, capture: true });
 
-      // ── 3. Block pointer events on canvas (newer Unity builds use these) ──
+      // ── 3. Block pointer events ONLY when controls active ──
       canvas.addEventListener('pointerdown', function(e) {
-        if (e.pointerType === 'touch' && !window.__fireButtonActive) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
+        if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
+          e.preventDefault(); e.stopImmediatePropagation();
         }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('pointerup', function(e) {
-        if (e.pointerType === 'touch' && !window.__fireButtonActive) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
+        if (controlsOn() && e.pointerType === 'touch' && !window.__fireButtonActive) {
+          e.preventDefault(); e.stopImmediatePropagation();
         }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('pointermove', function(e) {
-        // Block touch-type pointer moves to prevent Unity seeing them as mouse
-        if (e.pointerType === 'touch') {
-          e.preventDefault();
-          e.stopImmediatePropagation();
+        if (controlsOn() && e.pointerType === 'touch') {
+          e.preventDefault(); e.stopImmediatePropagation();
         }
       }, { passive: false, capture: true });
 
-      // ── 4. Intercept mousedown/mouseup/click on canvas ──
-      // Unity's framework may still synthesize mouse events from other paths.
-      // Block them unless our fire button flag is set.
+      // ── 4. Block mouse events ONLY when controls active ──
       canvas.addEventListener('mousedown', function(e) {
-        if (!window.__fireButtonActive) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
+        if (controlsOn() && !window.__fireButtonActive) {
+          e.preventDefault(); e.stopImmediatePropagation(); return false;
         }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('mouseup', function(e) {
-        if (!window.__fireButtonActive) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
+        if (controlsOn() && !window.__fireButtonActive) {
+          e.preventDefault(); e.stopImmediatePropagation(); return false;
         }
       }, { passive: false, capture: true });
 
       canvas.addEventListener('click', function(e) {
-        if (!window.__fireButtonActive) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
+        if (controlsOn() && !window.__fireButtonActive) {
+          e.preventDefault(); e.stopImmediatePropagation(); return false;
         }
       }, { passive: false, capture: true });
 
-      console.log('[MobileControls] Canvas touch interceptor AGGRESSIVE — all touch/pointer/mouse blocked unless fire button active');
+      console.log('[MobileControls] Canvas touch interceptor — blocks fire ONLY when controls active');
     }
     attach();
   }
