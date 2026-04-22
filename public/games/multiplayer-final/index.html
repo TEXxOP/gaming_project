@@ -11,7 +11,7 @@
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1" style="touch-action: manipulation;"></canvas>
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1" style="touch-action: none;"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -25,6 +25,41 @@
         <div id="unity-build-title">FPS multiplayer</div>
       </div>
     </div>
+    <script>
+      // ── PRE-EMPTIVE TOUCH BLOCKER ──
+      // Must run BEFORE Unity's framework to intercept touch-to-mouse synthesis.
+      // Fire only triggers via the mobile controls fire button (sets __fireButtonActive).
+      window.__fireButtonActive = false;
+      (function() {
+        var canvas = document.getElementById('unity-canvas');
+        if (!canvas) return;
+        // Block all touch events on canvas at capture phase
+        ['touchstart','touchend','touchmove','touchcancel'].forEach(function(evt) {
+          canvas.addEventListener(evt, function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }, { passive: false, capture: true });
+        });
+        // Block pointer events from touch
+        ['pointerdown','pointerup','pointermove'].forEach(function(evt) {
+          canvas.addEventListener(evt, function(e) {
+            if (e.pointerType === 'touch' && !window.__fireButtonActive) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          }, { passive: false, capture: true });
+        });
+        // Block mouse events unless fire button active
+        ['mousedown','mouseup','click'].forEach(function(evt) {
+          canvas.addEventListener(evt, function(e) {
+            if (!window.__fireButtonActive) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+            }
+          }, { passive: false, capture: true });
+        });
+      })();
+    </script>
     <script>
 
       var container = document.querySelector("#unity-container");
