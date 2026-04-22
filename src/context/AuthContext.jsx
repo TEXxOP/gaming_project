@@ -11,24 +11,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Silently resolve redirect results
-    getRedirectResult(auth).then((result) => {
-      if (result) {
-        console.log("Successfully logged in via redirect.");
-      }
-    }).catch((error) => {
-      // Ignore user-cancelled redirects cleanly
-      if (error.code !== 'auth/redirect-cancelled-by-user') {
-        console.error("Unexpected redirect error:", error);
-      }
-    });
+    let unsubscribe;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
+    // Handle redirect result first before setting up auth listener
+    const handleRedirectAndSetupListener = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Successfully logged in via redirect.");
+          setUser(result.user);
+        }
+      } catch (error) {
+        // Ignore user-cancelled redirects cleanly
+        if (error.code !== 'auth/redirect-cancelled-by-user') {
+          console.error("Unexpected redirect error:", error);
+        }
+      }
 
-    return () => unsubscribe();
+      // Set up the auth state listener after handling redirect
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      });
+    };
+
+    handleRedirectAndSetupListener();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const value = {

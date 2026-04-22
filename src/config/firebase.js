@@ -19,6 +19,7 @@ export const logInWithGoogle = async () => {
     try {
         // Try popup first. It is the most seamless if it works.
         const result = await signInWithPopup(auth, googleProvider);
+        console.log("Login successful via popup");
         return result.user;
     } catch (error) {
         // If the browser aggressively blocks the popup, fall back to redirect.
@@ -28,7 +29,7 @@ export const logInWithGoogle = async () => {
             return null;
         } else if (error.code === 'auth/popup-closed-by-user') {
             console.log("User manually closed the popup.");
-            throw error;
+            return null; // Don't throw, just return null for user cancellation
         } else {
             console.error("Error signing in with Google:", error);
             throw error;
