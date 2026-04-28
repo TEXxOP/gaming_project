@@ -26,7 +26,7 @@
       </div>
     </div>
     <script>
-      // Fire button flag — no event interception here.
+      // Fire button flag – no event interception here.
       // Touch blocking is handled by the mobile-controls-layer overlay.
       window.__fireButtonActive = false;
     </script>
@@ -102,8 +102,10 @@
         container.className = "unity-mobile";
         canvas.className = "unity-mobile";
 
-        // Lower canvas resolution on mobile to prevent OOM crashes
-        config.devicePixelRatio = 1;
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
 
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
@@ -111,25 +113,6 @@
         canvas.style.width = "960px";
         canvas.style.height = "600px";
       }
-
-      // ─── WebGL context loss recovery ───
-      canvas.addEventListener('webglcontextlost', function(e) {
-        e.preventDefault();
-        console.warn('[WebGL] Context lost — game may need reload');
-        var overlay = document.createElement('div');
-        overlay.id = 'context-lost-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:Inter,sans-serif;gap:16px;';
-        overlay.innerHTML = '<h2 style="font-size:20px;">Graphics Lost</h2><p style="font-size:14px;color:#aaa;">Tap to reload the game</p>';
-        overlay.addEventListener('click', function() { location.reload(); });
-        overlay.addEventListener('touchstart', function() { location.reload(); });
-        document.body.appendChild(overlay);
-      });
-
-      canvas.addEventListener('webglcontextrestored', function() {
-        console.log('[WebGL] Context restored');
-        var overlay = document.getElementById('context-lost-overlay');
-        if (overlay) overlay.remove();
-      });
 
       loadingBar.style.display = "block";
 

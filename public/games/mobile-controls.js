@@ -279,7 +279,7 @@
       '    <rect x="2" y="4" width="20" height="16" rx="2"/>',
       '    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>',
       '  </svg>',
-      '  Chat',
+      '  Keyboard',
       '</button>'
     ].join('\n');
     document.body.appendChild(kbHelper);
@@ -306,6 +306,25 @@
       '<span>Fullscreen</span>'
     ].join('\n');
     document.body.appendChild(fsBtn);
+
+    // ── PC Chat button ──
+    if (gameType === 'fps') {
+      var chatBtn = document.createElement('button');
+      chatBtn.id = 'mobile-chat-btn';
+      chatBtn.innerHTML = [
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">',
+        '  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+        '</svg>',
+        '<span>Chat</span>'
+      ].join('\n');
+      chatBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        simulateKey('y', 'keydown', 'KeyY', 89);
+        simulateKey('y', 'keyup', 'KeyY', 89);
+      }, { passive: false });
+      document.body.appendChild(chatBtn);
+    }
 
     // ── Performance notice ──
     var perfNotice = document.createElement('div');

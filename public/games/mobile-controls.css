@@ -676,6 +676,45 @@ body.mobile-device #mobile-fullscreen-btn {
 }
 
 /* ──────────────────────────────────────────────────
+   PC CHAT BUTTON
+   ────────────────────────────────────────────────── */
+#mobile-chat-btn {
+  display: none;
+  position: fixed;
+  top: 8px;
+  right: 110px;
+  z-index: 10003;
+  background: rgba(15, 17, 22, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+#mobile-chat-btn:active {
+  transform: scale(0.93);
+  background: rgba(30, 34, 42, 0.9);
+}
+
+body.mobile-device #mobile-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ──────────────────────────────────────────────────
    ORIENTATION LOCK STYLES
    ────────────────────────────────────────────────── */
 
@@ -685,6 +724,7 @@ body.mobile-device #mobile-fullscreen-btn {
   body.mobile-device #controls-toggle,
   body.mobile-device #mobile-keyboard-helper,
   body.mobile-device #mobile-fullscreen-btn,
+  body.mobile-device #mobile-chat-btn,
   body.mobile-device #mobile-perf-notice {
     display: none !important;
   }
@@ -730,7 +770,8 @@ body.mobile-device #mobile-fullscreen-btn {
   }
 
   #controls-toggle,
-  #mobile-fullscreen-btn {
+  #mobile-fullscreen-btn,
+  #mobile-chat-btn {
     padding: 5px 10px;
     font-size: 10px;
   }
